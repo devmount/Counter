@@ -1,235 +1,597 @@
 <?php
 
 /**
- * Plugin:   Counter
- * @author:  HPdesigner (hpdesigner[at]web[dot]de)
- * @version: v1.1.2013-09-19
- * @license: GPL
- * @see:     Now faith is being sure of what we hope for and certain of what we do not see.
- * 			 — The Bible
+ * moziloCMS Plugin: Counter
+ *
+ * Counts, stores and analyzes current page visits.
+ *
+ * PHP version 5
+ *
+ * @category PHP
+ * @package  PHP_MoziloPlugins
+ * @author   HPdesigner <kontakt@devmount.de>
+ * @license  GPL v3
+ * @version  GIT: v1.1.2013-09-19
+ * @link     https://github.com/devmount/Counter
+ * @link     http://devmount.de/Develop/Mozilo%20Plugins/Counter.html
+ * @see      Now faith is being sure of what we hope for
+ *           and certain of what we do not see.
+ *            — The Bible
  *
  * Plugin created by DEVMOUNT
  * www.devmount.de
  *
-**/
+ */
 
-if(!defined('IS_CMS')) die();
+// only allow moziloCMS environment
+if (!defined('IS_CMS')) {
+    die();
+}
 
-class Counter extends Plugin {
+/**
+ * Counter Class
+ *
+ * @category PHP
+ * @package  PHP_MoziloPlugins
+ * @author   HPdesigner <kontakt@devmount.de>
+ * @license  GPL v3
+ * @link     https://github.com/devmount/Counter
+ */
+class Counter extends Plugin
+{
+    // language
+    private $_admin_lang;
+    private $_cms_lang;
 
-	public $admin_lang;
-	private $cms_lang;
+    // plugin information
+    const PLUGIN_AUTHOR  = 'HPdesigner';
+    const PLUGIN_DOCU
+        = 'http://devmount.de/Develop/Mozilo%20Plugins/Counter.html';
+    const PLUGIN_TITLE   = 'Counter';
+    const PLUGIN_VERSION = 'v1.1.2013-09-19';
+    const MOZILO_VERSION = '2.0';
+    private $_plugin_tags = array(
+        'tag' => '{Counter}',
+    );
 
-	function getContent($value) {
+    const LOGO_URL = 'http://media.devmount.de/logo_pluginconf.png';
 
-		global $CMS_CONF;
-		global $lang_counter;
+    /**
+     * set configuration elements, their default values and their configuration
+     * parameters
+     *
+     * @var array $_confdefault
+     *      text     => default, type, maxlength, size, regex
+     *      textarea => default, type, cols, rows, regex
+     *      password => default, type, maxlength, size, regex, saveasmd5
+     *      check    => default, type
+     *      radio    => default, type, descriptions
+     *      select   => default, type, descriptions, multiselect
+     */
+    private $_confdefault = array(
+        'resetdatum' => array(
+            'string',
+            'text',
+            '50',
+            '15',
+            '',
+        ),
+        'aufenthalt' => array(
+            'string',
+            'text',
+            '6',
+            '3',
+            "/^[0-9]{0,6}$/",
+        ),
+        'reload' => array(
+            'string',
+            'text',
+            '6',
+            '3',
+            "/^[0-9]{0,6}$/",
+        ),
+        'template' => array(
+            'string',
+            'textarea',
+            '10',
+            '10',
+            '',
+        ),
+    );
 
-		$this->cms_lang = new Language(PLUGIN_DIR_REL.'Counter/sprachen/cms_language_'.$CMS_CONF->get('cmslanguage').'.txt');
-		
-		// initialize values
-		$count 			= 0;
-		$time 			= time();
-		$ip 			= getenv(REMOTE_ADDR);
-		$filename 		= 'plugins/Counter/counterdb.txt';
-		$linearray 		= file($filename);
-		$current_date 	= date('d.m.y');
-		$setdate 		= 0;
-		$uhrzeit 		= date('H:i:s');
-		$countgueltig 	= $this->settings->get('aufenthalt');	// Aufenthaltszeit (in sec)
-		$reload 		= $this->settings->get('reload');		// Reloadsperre (in sec)
-		$olddate 		= $this->settings->get('resetdatum');   // Resetdatum
-		$max 			= 1;                           			// Rekord Initialisierung
-		$average 		= 0;									// Durchschnitt
-		$tstamp  		= mktime(0, 0, 0, date('m'), date('d')-1, date('Y'));
-		$datum_gestern 	= date('Y-m-d', $tstamp); 
-		$vorhanden 		= 0;
+    /**
+     * creates plugin content
+     *
+     * @param string $value Parameter divided by '|'
+     *
+     * @return string HTML output
+     */
+    function getContent($value)
+    {
+        global $CMS_CONF;
 
-		// check if IP exists
-		foreach($linearray as $sperre) {
-			$arraysp = explode('#',$sperre);
-			if($ip == trim($arraysp[1]) && $arraysp[0] > $time - $reload) $vorhanden = 1;
-		}
+        $this->_cms_lang = new Language(
+            $this->PLUGIN_SELF_DIR
+            . 'lang/cms_language_'
+            . $CMS_CONF->get('cmslanguage')
+            . '.txt'
+        );
 
-		// get day and total number
-		foreach($linearray as $line) {
-			$line = explode('#',$line);
-			if($line[0]=='datum' && trim($line[1]) != $current_date) $setdate = 1;
-			if($vorhanden==1) {
-				if($line[0] == 'heute' && $setdate == 0) $heute = trim($line[1]);
-				if($line[0] == 'heute' && $setdate == 1) { 
-					$heute = 1; 
-					$gestern = trim($line[1]); 
-				}
-				if($line[0] == 'gesamt') $gesamt = trim($line[1]);
-				if($line[0] == 'gestern' && $setdate == 0) $gestern = trim($line[1]);
-			} else {
-				if($line[0]=='heute' && $setdate == 0) $heute = trim($line[1]) + 1;
-				if($line[0]=='heute' && $setdate == 1) { 
-					$heute = 1; 
-					$gestern=trim($line[1]); 
-				}
-				if($line[0]=='gestern' && $setdate == 0) $gestern = trim($line[1]);
-				if($line[0]=='gesamt') $gesamt = trim($line[1]) + 1;
-			}
-			if ($line[0] == 'max') $max = trim($line[1]);
-		}
+        // get conf and set default
+        $conf = array();
+        foreach ($this->_confdefault as $elem => $default) {
+            $conf[$elem] = ($this->settings->get($elem) == '')
+                ? $default[0]
+                : $this->settings->get($elem);
+        }
 
-		// initialize counts
-		if ($heute == '') $heute = 0;
-		if ($gestern == '') $gestern = 0;
-		if ($max == '') $max = 0;
-		if ($gesamt == '') $gesamt = 0;
+        // initialize values
+        $count          = 0;
+        $time           = time();
+        $ip             = getenv(REMOTE_ADDR);
+        $filename       = 'plugins/Counter/counterdb.txt';
+        $linearray      = file($filename);
+        $current_date   = date('d.m.y');
+        $setdate        = 0;
+        $uhrzeit        = date('H:i:s');
+        $countgueltig   = $conf['aufenthalt']; // Aufenthaltszeit (in sec)
+        $reload         = $conf['reload'];     // Reloadsperre (in sec)
+        $olddate        = $conf['resetdatum']; // Resetdatum
+        $max            = 1;                   // Rekord Initialisierung
+        $average        = 0;                   // Durchschnitt
+        $tstamp         = mktime(0, 0, 0, date('m'), date('d')-1, date('Y'));
+        $datum_gestern  = date('Y-m-d', $tstamp);
+        $vorhanden      = 0;
 
-		// build maximum
-		if ($heute > $max) $max = $heute;
+        // check if IP exists
+        foreach($linearray as $sperre) {
+            $arraysp = explode('#',$sperre);
+            if ($ip == trim($arraysp[1]) && $arraysp[0] > $time - $reload) {
+                $vorhanden = 1;
+            }
+        }
 
-		// write day, total, maximal counts
-		$contenttowrite = '';
-		$contenttowrite .= 'datum'.'#'.$current_date."\n";
-		$contenttowrite .= 'heute'.'#'.$heute."\n";
-		$contenttowrite .= 'gestern'.'#'.$gestern."\n";
-		$contenttowrite .= 'gesamt'.'#'.$gesamt."\n";
-		$contenttowrite .= 'max'.'#'.$max."\n";
-		$contenttowrite .= $time.'#'.$ip."\n";;
-		$dbfile = fopen($filename , 'w');
-		if (flock($dbfile, LOCK_EX)) { 				// exclusive lock
-			fwrite ($dbfile, $contenttowrite);
-			flock($dbfile, LOCK_UN);				// free lock
-		}
-		fclose($dbfile);
+        // get day and total number
+        foreach ($linearray as $line) {
+            $line = explode('#',$line);
+            if ($line[0]=='datum' && trim($line[1]) != $current_date) {
+                $setdate = 1;
+            }
+            if ($vorhanden==1) {
+                if ($line[0] == 'heute' && $setdate == 0) {
+                    $heute = trim($line[1]);
+                }
+                if ($line[0] == 'heute' && $setdate == 1) {
+                    $heute = 1;
+                    $gestern = trim($line[1]);
+                }
+                if ($line[0] == 'gesamt') {
+                    $gesamt = trim($line[1]);
+                }
+                if ($line[0] == 'gestern' && $setdate == 0) {
+                    $gestern = trim($line[1]);
+                }
+            } else {
+                if ($line[0]=='heute' && $setdate == 0) {
+                    $heute = trim($line[1]) + 1;
+                }
+                if ($line[0]=='heute' && $setdate == 1) {
+                    $heute = 1;
+                    $gestern=trim($line[1]);
+                }
+                if ($line[0]=='gestern' && $setdate == 0) {
+                    $gestern = trim($line[1]);
+                }
+                if ($line[0]=='gesamt') {
+                    $gesamt = trim($line[1]) + 1;
+                }
+            }
+            if ($line[0] == 'max') {
+                $max = trim($line[1]);
+            }
+        }
 
-		// write online count
-		$dbfile = fopen($filename , 'a');
-		foreach($linearray as $useronline) {
-			$useronlinearray = explode('#',$useronline);
-			if($useronlinearray[0] > $time - $countgueltig && $ip != rtrim($useronlinearray[1])) {
-				if (flock($dbfile, LOCK_EX)) { 		// exclusive lock
-					fwrite ($dbfile,$useronline);
-					flock($dbfile, LOCK_UN);		// free lock
-				}
-			}
-		}
-		fclose($dbfile);
+        // initialize counts
+        if ($heute == '') {
+            $heute = 0;
+        }
+        if ($gestern == '') {
+            $gestern = 0;
+        }
+        if ($max == '') {
+            $max = 0;
+        }
+        if ($gesamt == '') {
+            $gesamt = 0;
+        }
 
-		// evaluate average
-		$verstrichene_tage = bcdiv((strtotime(date($datum_gestern)) - strtotime($olddate)), 86400, 0);
-		if($verstrichene_tage > 0) $average = round((($gesamt - $heute)/$verstrichene_tage), 1); 
-		else $average = 0;
+        // build maximum
+        if ($heute > $max) {
+            $max = $heute;
+        }
 
-		// get online count
-		$werte = file($filename);
-		$count = count($werte)-5;
+        // write day, total, maximal counts
+        $contenttowrite = '';
+        $contenttowrite .= 'datum' . '#' . $current_date . "\n";
+        $contenttowrite .= 'heute' . '#' . $heute . "\n";
+        $contenttowrite .= 'gestern' . '#' . $gestern . "\n";
+        $contenttowrite .= 'gesamt' . '#' . $gesamt . "\n";
+        $contenttowrite .= 'max' . '#' . $max . "\n";
+        $contenttowrite .= $time . '#' . $ip . "\n";;
+        $dbfile = fopen($filename , 'w');
 
-		// load template
-		$conf_template	= $this->settings->get('template');
-				
-		// write output
-		$online 	= '';
-		$today 		= '';
-		$yesterday 	= '';
-		$maximum 	= '';
-		$average 	= '';
-		$total 		= '';
+        // exclusive lock
+        if (flock($dbfile, LOCK_EX)) {
+            fwrite ($dbfile, $contenttowrite);
+            // free lock
+            flock($dbfile, LOCK_UN);
+        }
+        fclose($dbfile);
 
-		$online 	= $this->cms_lang->getLanguageValue('count_online').' '.$count;
-		$today 		= $this->cms_lang->getLanguageValue('count_heute').' '.$heute;
-		$yesterday 	= $this->cms_lang->getLanguageValue('count_gestern').' '.$gestern;
-		$maximum 	= $this->cms_lang->getLanguageValue('count_rekord').' '.$max;
-		$average 	= $this->cms_lang->getLanguageValue('count_schnitt').' '.$average;
-		$total 		= $this->cms_lang->getLanguageValue('count_gesamt').' '.$gesamt;
+        // write online count
+        $dbfile = fopen($filename , 'a');
+        foreach($linearray as $useronline) {
+            $useronlinearray = explode('#',$useronline);
+            if (
+                ($useronlinearray[0] > $time - $countgueltig)
+                && ($ip != rtrim($useronlinearray[1]))
+            ) {
+                // exclusive lock
+                if (flock($dbfile, LOCK_EX)) {
+                    fwrite ($dbfile,$useronline);
+                    // free lock
+                    flock($dbfile, LOCK_UN);
+                }
+            }
+        }
+        fclose($dbfile);
 
-		$counter = '';
+        // evaluate average
+        $verstrichene_tage = bcdiv(
+            (strtotime(date($datum_gestern)) - strtotime($olddate)),
+            86400,
+            0
+        );
+        if ($verstrichene_tage > 0) {
+            $average = round((($gesamt - $heute)/$verstrichene_tage), 1);
+        } else {
+            $average = 0;
+        }
 
-		if (isset($conf_template)) {
-			$counter .= $conf_template;
-			$counter = str_replace(
-				array("{ONLINE}", "{TODAY}", "{YESTERDAY}", "{MAXIMUM}", "{AVERAGE}", "{TOTAL}", "{DATE}"),
-				array($online, $today, $yesterday, $maximum, $average, $total, $olddate),
-				$counter
-			);
-		} else $counter .= $online . ' ' . $today . ' ' . $yesterday . ' ' . $maximum . ' ' . $average . ' ' . $total . ' ' . $olddate;
-				
-		return $counter;
+        // get online count
+        $werte = file($filename);
+        $count = count($werte)-5;
 
-	} // function getContent
-	
-	
+        // load template
+        $conf_template  = $conf['template'];
 
-	function getConfig() {
-		
-		$config = array();
-		
-		// Resetdatum
-		$config['resetdatum']  = array(
-			'type' => 'text',
-			'description' => $this->admin_lang->getLanguageValue('config_resetdatum'),
-			'maxlength' => '50',
-			'size' => '15'
-		);
-		
-		// Gültige Aufenthaltsdauer
-		$config['aufenthalt']  = array(
-			'type' => 'text',
-			'description' => $this->admin_lang->getLanguageValue('config_aufenthalt'),
-			'maxlength' => '50',
-			'size' => '3',
-			'regex' => "/^[0-9]{0,6}$/",
-			'regex_error' => $this->admin_lang->getLanguageValue('config_aufenthalt_error')
-		);
+        // write output
+        $online    = '';
+        $today     = '';
+        $yesterday = '';
+        $maximum   = '';
+        $average   = '';
+        $total     = '';
 
-		// Reloadsperre
-		$config['reload']  = array(
-			'type' => 'text',
-			'description' => $this->admin_lang->getLanguageValue('config_reload'),
-			'maxlength' => '50',
-			'size' => '3',
-			'regex' => "/^[0-9]{0,6}$/",
-			'regex_error' => $this->admin_lang->getLanguageValue('config_reload_error')
-		);       
-			
-		// Template
-		$config['template']  = array(
-			"type" => "textarea",
-			"rows" => "5",
-			"description" => $this->admin_lang->getLanguageValue("config_template"),
-			'template' => '{template_description}<br />{template_textarea}'
-		);
-		
-		
-		// Rückgabe
-		return $config;
+        $online
+            = $this->_cms_lang->getLanguageValue('count_online') . ' ' . $count;
+        $today
+            = $this->_cms_lang->getLanguageValue('count_heute') . ' ' . $heute;
+        $yesterday
+            = $this->_cms_lang->getLanguageValue('count_gestern') . ' ' . $gestern;
+        $maximum
+            = $this->_cms_lang->getLanguageValue('count_rekord') . ' ' . $max;
+        $average
+            = $this->_cms_lang->getLanguageValue('count_schnitt') . ' ' . $average;
+        $total
+            = $this->_cms_lang->getLanguageValue('count_gesamt') . ' ' . $gesamt;
 
-	} // function getConfig    
-	
-	
-	function getInfo() {
-		global $ADMIN_CONF;
+        // initialize return content, begin plugin content
+        $counter = '<!-- BEGIN ' . self::PLUGIN_TITLE . ' plugin content --> ';
 
-		$this->admin_lang = new Language(PLUGIN_DIR_REL.'Counter/sprachen/admin_language_'.$ADMIN_CONF->get('language').'.txt');
-				
-		$info = array(
-			// Plugin-Name + Version
-			'<b>Counter</b> v1.1.2013-09-19',
-			// moziloCMS-Version
-			'2.0',
-			// Kurzbeschreibung nur <span> und <br /> sind erlaubt
-			$this->admin_lang->getLanguageValue('config_description'), 
-			// Name des Autors
-			'HPdesigner',
-			// Docu-URL
-			'http://www.devmount.de/Develop/Mozilo%20Plugins/Counter.html',
-			// Platzhalter für die Selectbox in der Editieransicht 
-			// - ist das Array leer, erscheint das Plugin nicht in der Selectbox
-			array(
-				'{Counter}' => $this->admin_lang->getLanguageValue('toolbar_platzhalter')
-			)
-		);
-		// Rückgabe der Infos.
-		return $info;
-		
-	} // function getInfo
+        if (isset($conf_template)) {
+            $counter .= $conf_template;
+            $counter = str_replace(
+                array(
+                    "{ONLINE}",
+                    "{TODAY}",
+                    "{YESTERDAY}",
+                    "{MAXIMUM}",
+                    "{AVERAGE}",
+                    "{TOTAL}",
+                    "{DATE}",
+                ),
+                array($online,
+                    $today,
+                    $yesterday,
+                    $maximum,
+                    $average,
+                    $total,
+                    $olddate,
+                ),
+                $counter
+            );
+        } else {
+            $counter
+                .= $online . ' '
+                . $today . ' '
+                . $yesterday . ' '
+                . $maximum . ' '
+                . $average . ' '
+                . $total . ' '
+                . $olddate;
+        }
 
+        // end plugin content
+        $counter .= '<!-- END ' . self::PLUGIN_TITLE . ' plugin content --> ';
+
+        return $counter;
+    }
+
+    /**
+     * sets backend configuration elements and template
+     *
+     * @return Array configuration
+     */
+    function getConfig()
+    {
+        $config = array();
+
+        // read configuration values
+        foreach ($this->_confdefault as $key => $value) {
+            // handle each form type
+            switch ($value[1]) {
+            case 'text':
+                $config[$key] = $this->confText(
+                    $this->_admin_lang->getLanguageValue('config_' . $key),
+                    $value[2],
+                    $value[3],
+                    $value[4],
+                    $this->_admin_lang->getLanguageValue(
+                        'config_' . $key . '_error'
+                    )
+                );
+                break;
+
+            case 'textarea':
+                $config[$key] = $this->confTextarea(
+                    $this->_admin_lang->getLanguageValue('config_' . $key),
+                    $value[2],
+                    $value[3],
+                    $value[4],
+                    $this->_admin_lang->getLanguageValue(
+                        'config_' . $key . '_error'
+                    )
+                );
+                break;
+
+            case 'password':
+                $config[$key] = $this->confPassword(
+                    $this->_admin_lang->getLanguageValue('config_' . $key),
+                    $value[2],
+                    $value[3],
+                    $value[4],
+                    $this->_admin_lang->getLanguageValue(
+                        'config_' . $key . '_error'
+                    ),
+                    $value[5]
+                );
+                break;
+
+            case 'check':
+                $config[$key] = $this->confCheck(
+                    $this->_admin_lang->getLanguageValue('config_' . $key)
+                );
+                break;
+
+            case 'radio':
+                $descriptions = array();
+                foreach ($value[2] as $label) {
+                    $descriptions[$label] = $this->_admin_lang->getLanguageValue(
+                        'config_' . $key . '_' . $label
+                    );
+                }
+                $config[$key] = $this->confRadio(
+                    $this->_admin_lang->getLanguageValue('config_' . $key),
+                    $descriptions
+                );
+                break;
+
+            case 'select':
+                $descriptions = array();
+                foreach ($value[2] as $label) {
+                    $descriptions[$label] = $this->_admin_lang->getLanguageValue(
+                        'config_' . $key . '_' . $label
+                    );
+                }
+                $config[$key] = $this->confSelect(
+                    $this->_admin_lang->getLanguageValue('config_' . $key),
+                    $descriptions,
+                    $value[3]
+                );
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        // read admin.css
+        $admin_css = '';
+        $lines = file('../plugins/' . self::PLUGIN_TITLE. '/admin.css');
+        foreach ($lines as $line_num => $line) {
+            $admin_css .= trim($line);
+        }
+
+        // add template CSS
+        $template = '<style>' . $admin_css . '</style>';
+
+        // build Template
+        $template .= '
+            <div class="counter-admin-header">
+            <span>'
+                . $this->_admin_lang->getLanguageValue(
+                    'admin_header',
+                    self::PLUGIN_TITLE
+                )
+            . '</span>
+            <a href="' . self::PLUGIN_DOCU . '" target="_blank">
+            <img style="float:right;" src="' . self::LOGO_URL . '" />
+            </a>
+            </div>
+        </li>
+        <li class="mo-in-ul-li ui-widget-content counter-admin-li">
+            <div class="counter-admin-subheader">'
+            . $this->_admin_lang->getLanguageValue('admin_test')
+            . '</div>
+            <div style="margin-bottom:5px;">
+                {test1_text}
+                {test1_description}
+                <span class="counter-admin-default">
+                    [' . /*$this->_confdefault['test1'][0] .*/']
+                </span>
+            </div>
+            <div style="margin-bottom:5px;">
+                {test2_text}
+                {test2_description}
+                <span class="counter-admin-default">
+                    [' . /*$this->_confdefault['test2'][0] .*/']
+                </span>
+        ';
+
+        $config['--template~~'] = $template;
+
+        return $config;
+    }
+
+    /**
+     * sets default backend configuration elements, if no plugin.conf.php is
+     * created yet
+     *
+     * @return Array configuration
+     */
+    function getDefaultSettings()
+    {
+        $config = array('active' => 'true');
+        foreach ($this->_confdefault as $elem => $default) {
+            $config[$elem] = $default[0];
+        }
+        return $config;
+    }
+
+    /**
+     * sets backend plugin information
+     *
+     * @return Array information
+     */
+    function getInfo()
+    {
+        global $ADMIN_CONF;
+        $this->_admin_lang = new Language(
+            $this->PLUGIN_SELF_DIR
+            . 'lang/admin_language_'
+            . $ADMIN_CONF->get('language')
+            . '.txt'
+        );
+
+        // build plugin tags
+        $tags = array();
+        foreach ($this->_plugin_tags as $key => $tag) {
+            $tags[$tag] = $this->_admin_lang->getLanguageValue('tag_' . $key);
+        }
+
+        $info = array(
+            '<b>' . self::PLUGIN_TITLE . '</b> ' . self::PLUGIN_VERSION,
+            self::MOZILO_VERSION,
+            $this->_admin_lang->getLanguageValue(
+                'description',
+                htmlspecialchars($this->_plugin_tags['tag'])
+            ),
+            self::PLUGIN_AUTHOR,
+            self::PLUGIN_DOCU,
+            $tags
+        );
+
+        return $info;
+    }
+
+    /**
+     * creates configuration for text fields
+     *
+     * @param string $description Label
+     * @param string $maxlength   Maximum number of characters
+     * @param string $size        Size
+     * @param string $regex       Regular expression for allowed input
+     * @param string $regex_error Wrong input error message
+     *
+     * @return Array  Configuration
+     */
+    protected function confText(
+        $description,
+        $maxlength = '',
+        $size = '',
+        $regex = '',
+        $regex_error = ''
+    ) {
+        // required properties
+        $conftext = array(
+            'type' => 'text',
+            'description' => $description,
+        );
+        // optional properties
+        if ($maxlength != '') {
+            $conftext['maxlength'] = $maxlength;
+        }
+        if ($size != '') {
+            $conftext['size'] = $size;
+        }
+        if ($regex != '') {
+            $conftext['regex'] = $regex;
+        }
+        if ($regex_error != '') {
+            $conftext['regex_error'] = $regex_error;
+        }
+        return $conftext;
+    }
+
+    /**
+     * creates configuration for textareas
+     *
+     * @param string $description Label
+     * @param string $cols        Number of columns
+     * @param string $rows        Number of rows
+     * @param string $regex       Regular expression for allowed input
+     * @param string $regex_error Wrong input error message
+     *
+     * @return Array  Configuration
+     */
+    protected function confTextarea(
+        $description,
+        $cols = '',
+        $rows = '',
+        $regex = '',
+        $regex_error = ''
+    ) {
+        // required properties
+        $conftext = array(
+            'type' => 'text',
+            'description' => $description,
+        );
+        // optional properties
+        if ($cols != '') {
+            $conftext['cols'] = $cols;
+        }
+        if ($rows != '') {
+            $conftext['rows'] = $rows;
+        }
+        if ($regex != '') {
+            $conftext['regex'] = $regex;
+        }
+        if ($regex_error != '') {
+            $conftext['regex_error'] = $regex_error;
+        }
+        return $conftext;
+    }
 }
 
 ?>
