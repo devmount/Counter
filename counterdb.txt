@@ -1,0 +1,6 @@
+datum#
+heute#
+gestern#
+gesamt#
+max#
+

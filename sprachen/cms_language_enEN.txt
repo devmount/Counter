@@ -1,0 +1,6 @@
+count_online 	= Online:
+count_heute 	= Today:
+count_gestern 	= Yesterday:
+count_rekord 	= Record:
+count_schnitt 	= Ø:
+count_gesamt 	= Total:
