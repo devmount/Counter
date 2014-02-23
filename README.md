@@ -17,7 +17,8 @@ Installing a plugin manually requires FTP Access.
 
 ## Syntax
 ```{Counter}```
-Here comes the general description of the plugin tag.
+Inserts the Counter and depending on backend configuration different or all counter elements.
+If visits shall be counted for the whole website, the plugin tag can be placed in the *template.html* of the current template (e.g. in the footer section).
 
 ## License
 This Plugin is distributed under *GNU General Public License, Version 3* (see LICENSE).
