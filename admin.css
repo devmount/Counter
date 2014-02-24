@@ -21,6 +21,9 @@
 .counter-admin-li {
     background: #eee;
 }
+.counter-admin-li pre{
+    white-space: normal;
+}
 .counter-admin-default {
     color: #aaa;
     padding-left: 6px;

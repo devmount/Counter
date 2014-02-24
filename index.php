@@ -52,7 +52,6 @@ class Counter extends Plugin
     const MOZILO_VERSION = '2.0';
     private $_plugin_tags = array(
         'tag'      => '{Counter}',
-        'tagreset' => '{Counter|resetdate}',
     );
     private $_template_elements = array(
         '#ONLINE#',
@@ -79,7 +78,7 @@ class Counter extends Plugin
      *      select   => default, type, descriptions, multiselect
      */
     private $_confdefault = array(
-        'resetdatum' => array(
+        'resetdate' => array(
             'd.m.Y',
             'text',
             '50',
@@ -101,7 +100,7 @@ class Counter extends Plugin
             "/^[0-9]{0,6}$/",
         ),
         'template' => array(
-            '{ONLINE} | {TODAY} | {TOTAL}',
+            '#ONLINE# | #TODAY# | #TOTAL#',
             'textarea',
             '70',
             '8',
@@ -136,38 +135,35 @@ class Counter extends Plugin
         }
 
         // initialize values
-        $online          = 0;
-        $time           = time();
-        $ip             = getenv(REMOTE_ADDR);
-        $filename       = 'plugins/Counter/counterdb.txt';
-        $linearray      = file($filename);
-        $current_date   = date('d.m.y');
-        $setdate        = 0;
-        $uhrzeit        = date('H:i:s');
-        $countgueltig   = $conf['mintime']; // Aufenthaltszeit (in sec)
-        $reload         = $conf['reload'];     // Reloadsperre (in sec)
-        $olddate        = $conf['resetdatum']; // Resetdatum
-        $max            = 1;                   // Rekord Initialisierung
-        $average        = 0;                   // Durchschnitt
-        $tstamp         = mktime(0, 0, 0, date('m'), date('d')-1, date('Y'));
-        $datum_gestern  = date('Y-m-d', $tstamp);
-        $vorhanden      = 0;
+        $online           = 0;
+        $time             = time();
+        $ip               = getenv(REMOTE_ADDR);
+        $filename         = 'plugins/Counter/counterdb.txt';
+        $lines            = file($filename);
+        $current_date     = date('d.m.y');
+        $setdate          = 0;
+        $resetdate        = $conf['resetdate'];
+        $max              = 1;
+        $average          = 0;
+        $tstamp_yesterday = mktime(0, 0, 0, date('m'), date('d')-1, date('Y'));
+        $date_yesterday   = date('Y-m-d', $tstamp_yesterday);
+        $locked_ip        = 0;
 
         // check if IP exists
-        foreach ($linearray as $sperre) {
+        foreach ($lines as $sperre) {
             $arraysp = explode('#', $sperre);
-            if ($ip == trim($arraysp[1]) && $arraysp[0] > $time - $reload) {
-                $vorhanden = 1;
+            if ($ip == trim($arraysp[1]) && $arraysp[0] > $time - $conf['reload']) {
+                $locked_ip = 1;
             }
         }
 
         // get day and total number
-        foreach ($linearray as $line) {
+        foreach ($lines as $line) {
             $line = explode('#', $line);
             if ($line[0]=='datum' && trim($line[1]) != $current_date) {
                 $setdate = 1;
             }
-            if ($vorhanden==1) {
+            if ($locked_ip==1) {
                 if ($line[0] == 'heute' && $setdate == 0) {
                     $today = trim($line[1]);
                 }
@@ -227,7 +223,7 @@ class Counter extends Plugin
         $contenttowrite .= 'gestern' . '#' . $yesterday . "\n";
         $contenttowrite .= 'gesamt' . '#' . $total . "\n";
         $contenttowrite .= 'max' . '#' . $max . "\n";
-        $contenttowrite .= $time . '#' . $ip . "\n";;
+        $contenttowrite .= $time . '#' . $ip . "\n";
         $dbfile = fopen($filename, 'w');
 
         // exclusive lock
@@ -240,9 +236,9 @@ class Counter extends Plugin
 
         // write online count
         $dbfile = fopen($filename, 'a');
-        foreach ($linearray as $useronline) {
+        foreach ($lines as $useronline) {
             $useronlinearray = explode('#', $useronline);
-            if (($useronlinearray[0] > $time - $countgueltig)
+            if (($useronlinearray[0] > $time - $conf['mintime'])
                 && ($ip != rtrim($useronlinearray[1]))
             ) {
                 // exclusive lock
@@ -256,13 +252,13 @@ class Counter extends Plugin
         fclose($dbfile);
 
         // evaluate average
-        $verstrichene_tage = bcdiv(
-            (strtotime(date($datum_gestern)) - strtotime($olddate)),
+        $dayspan = bcdiv(
+            (strtotime(date($date_yesterday )) - strtotime($resetdate)),
             86400,
             0
         );
-        if ($verstrichene_tage > 0) {
-            $average = round((($total - $today)/$verstrichene_tage), 1);
+        if ($dayspan > 0) {
+            $average = round((($total - $today)/$dayspan), 1);
         } else {
             $average = 0;
         }
@@ -287,7 +283,7 @@ class Counter extends Plugin
                     $max,
                     $average,
                     $total,
-                    $olddate,
+                    $resetdate,
                 ),
                 $counter
             );
@@ -299,7 +295,7 @@ class Counter extends Plugin
                 . $max . ' '
                 . $average . ' '
                 . $total . ' '
-                . $olddate;
+                . $resetdate;
         }
 
         // end plugin content
@@ -431,10 +427,10 @@ class Counter extends Plugin
             . $this->_admin_lang->getLanguageValue('admin_date_times')
             . '</div>
             <div style="margin-bottom:5px;">
-                {resetdatum_text}
-                {resetdatum_description}
+                {resetdate_text}
+                {resetdate_description}
                 <span class="counter-admin-default">
-                    [' . $this->_confdefault['resetdatum'][0] .']
+                    [' . $this->_confdefault['resetdate'][0] .']
                 </span>
             </div>
             <div style="margin-bottom:5px;">
@@ -514,8 +510,7 @@ class Counter extends Plugin
             self::MOZILO_VERSION,
             $this->_admin_lang->getLanguageValue(
                 'description',
-                htmlspecialchars($this->_plugin_tags['tag']),
-                htmlspecialchars($this->_plugin_tags['tagreset'])
+                htmlspecialchars($this->_plugin_tags['tag'])
             ),
             self::PLUGIN_AUTHOR,
             self::PLUGIN_DOCU,
