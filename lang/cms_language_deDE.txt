@@ -1,6 +1,0 @@
-count_online 	= Online:
-count_heute 	= Heute:
-count_gestern 	= Gestern:
-count_rekord 	= Rekord:
-count_schnitt 	= Ø:
-count_gesamt 	= Gesamt:
