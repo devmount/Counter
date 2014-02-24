@@ -51,7 +51,17 @@ class Counter extends Plugin
     const PLUGIN_VERSION = 'v1.1.2013-09-19';
     const MOZILO_VERSION = '2.0';
     private $_plugin_tags = array(
-        'tag' => '{Counter}',
+        'tag'      => '{Counter}',
+        'tagreset' => '{Counter|resetdate}',
+    );
+    private $_template_elements = array(
+        '#ONLINE#',
+        '#TODAY#',
+        '#YESTERDAY#',
+        '#MAXIMUM#',
+        '#AVERAGE#',
+        '#TOTAL#',
+        '#DATE#',
     );
 
     const LOGO_URL = 'http://media.devmount.de/logo_pluginconf.png';
@@ -70,31 +80,31 @@ class Counter extends Plugin
      */
     private $_confdefault = array(
         'resetdatum' => array(
-            'string',
+            'd.m.Y',
             'text',
             '50',
             '15',
             '',
         ),
-        'aufenthalt' => array(
-            'string',
+        'mintime' => array(
+            '60',
             'text',
             '6',
             '3',
             "/^[0-9]{0,6}$/",
         ),
         'reload' => array(
-            'string',
+            '120',
             'text',
             '6',
             '3',
             "/^[0-9]{0,6}$/",
         ),
         'template' => array(
-            'string',
+            '{ONLINE} | {TODAY} | {TOTAL}',
             'textarea',
-            '10',
-            '10',
+            '70',
+            '8',
             '',
         ),
     );
@@ -126,7 +136,7 @@ class Counter extends Plugin
         }
 
         // initialize values
-        $count          = 0;
+        $online          = 0;
         $time           = time();
         $ip             = getenv(REMOTE_ADDR);
         $filename       = 'plugins/Counter/counterdb.txt';
@@ -134,7 +144,7 @@ class Counter extends Plugin
         $current_date   = date('d.m.y');
         $setdate        = 0;
         $uhrzeit        = date('H:i:s');
-        $countgueltig   = $conf['aufenthalt']; // Aufenthaltszeit (in sec)
+        $countgueltig   = $conf['mintime']; // Aufenthaltszeit (in sec)
         $reload         = $conf['reload'];     // Reloadsperre (in sec)
         $olddate        = $conf['resetdatum']; // Resetdatum
         $max            = 1;                   // Rekord Initialisierung
@@ -159,31 +169,31 @@ class Counter extends Plugin
             }
             if ($vorhanden==1) {
                 if ($line[0] == 'heute' && $setdate == 0) {
-                    $heute = trim($line[1]);
+                    $today = trim($line[1]);
                 }
                 if ($line[0] == 'heute' && $setdate == 1) {
-                    $heute = 1;
-                    $gestern = trim($line[1]);
+                    $today = 1;
+                    $yesterday = trim($line[1]);
                 }
                 if ($line[0] == 'gesamt') {
-                    $gesamt = trim($line[1]);
+                    $total = trim($line[1]);
                 }
                 if ($line[0] == 'gestern' && $setdate == 0) {
-                    $gestern = trim($line[1]);
+                    $yesterday = trim($line[1]);
                 }
             } else {
                 if ($line[0]=='heute' && $setdate == 0) {
-                    $heute = trim($line[1]) + 1;
+                    $today = trim($line[1]) + 1;
                 }
                 if ($line[0]=='heute' && $setdate == 1) {
-                    $heute = 1;
-                    $gestern=trim($line[1]);
+                    $today = 1;
+                    $yesterday=trim($line[1]);
                 }
                 if ($line[0]=='gestern' && $setdate == 0) {
-                    $gestern = trim($line[1]);
+                    $yesterday = trim($line[1]);
                 }
                 if ($line[0]=='gesamt') {
-                    $gesamt = trim($line[1]) + 1;
+                    $total = trim($line[1]) + 1;
                 }
             }
             if ($line[0] == 'max') {
@@ -192,30 +202,30 @@ class Counter extends Plugin
         }
 
         // initialize counts
-        if ($heute == '') {
-            $heute = 0;
+        if ($today == '') {
+            $today = 0;
         }
-        if ($gestern == '') {
-            $gestern = 0;
+        if ($yesterday == '') {
+            $yesterday = 0;
         }
         if ($max == '') {
             $max = 0;
         }
-        if ($gesamt == '') {
-            $gesamt = 0;
+        if ($total == '') {
+            $total = 0;
         }
 
         // build maximum
-        if ($heute > $max) {
-            $max = $heute;
+        if ($today > $max) {
+            $max = $today;
         }
 
         // write day, total, maximal counts
         $contenttowrite = '';
         $contenttowrite .= 'datum' . '#' . $current_date . "\n";
-        $contenttowrite .= 'heute' . '#' . $heute . "\n";
-        $contenttowrite .= 'gestern' . '#' . $gestern . "\n";
-        $contenttowrite .= 'gesamt' . '#' . $gesamt . "\n";
+        $contenttowrite .= 'heute' . '#' . $today . "\n";
+        $contenttowrite .= 'gestern' . '#' . $yesterday . "\n";
+        $contenttowrite .= 'gesamt' . '#' . $total . "\n";
         $contenttowrite .= 'max' . '#' . $max . "\n";
         $contenttowrite .= $time . '#' . $ip . "\n";;
         $dbfile = fopen($filename, 'w');
@@ -252,31 +262,17 @@ class Counter extends Plugin
             0
         );
         if ($verstrichene_tage > 0) {
-            $average = round((($gesamt - $heute)/$verstrichene_tage), 1);
+            $average = round((($total - $today)/$verstrichene_tage), 1);
         } else {
             $average = 0;
         }
 
         // get online count
         $werte = file($filename);
-        $count = count($werte)-5;
+        $online = count($werte)-5;
 
         // load template
-        $conf_template  = $conf['template'];
-
-        // write output
-        $online
-            = $this->_cms_lang->getLanguageValue('count_online') . ' ' . $count;
-        $today
-            = $this->_cms_lang->getLanguageValue('count_heute') . ' ' . $heute;
-        $yesterday
-            = $this->_cms_lang->getLanguageValue('count_gestern') . ' ' . $gestern;
-        $maximum
-            = $this->_cms_lang->getLanguageValue('count_rekord') . ' ' . $max;
-        $average
-            = $this->_cms_lang->getLanguageValue('count_schnitt') . ' ' . $average;
-        $total
-            = $this->_cms_lang->getLanguageValue('count_gesamt') . ' ' . $gesamt;
+        $conf_template = $conf['template'];
 
         // initialize return content, begin plugin content
         $counter = '<!-- BEGIN ' . self::PLUGIN_TITLE . ' plugin content --> ';
@@ -284,19 +280,11 @@ class Counter extends Plugin
         if (isset($conf_template)) {
             $counter .= $conf_template;
             $counter = str_replace(
-                array(
-                    "{ONLINE}",
-                    "{TODAY}",
-                    "{YESTERDAY}",
-                    "{MAXIMUM}",
-                    "{AVERAGE}",
-                    "{TOTAL}",
-                    "{DATE}",
-                ),
+                $this->_template_elements,
                 array($online,
                     $today,
                     $yesterday,
-                    $maximum,
+                    $max,
                     $average,
                     $total,
                     $olddate,
@@ -308,7 +296,7 @@ class Counter extends Plugin
                 .= $online . ' '
                 . $today . ' '
                 . $yesterday . ' '
-                . $maximum . ' '
+                . $max . ' '
                 . $average . ' '
                 . $total . ' '
                 . $olddate;
@@ -415,6 +403,12 @@ class Counter extends Plugin
             $admin_css .= trim($line);
         }
 
+        // build template elements string
+        $template_elements = '';
+        foreach ($this->_template_elements as $elem) {
+            $template_elements .= $elem . ' ';
+        }
+
         // add template CSS
         $template = '<style>' . $admin_css . '</style>';
 
@@ -434,21 +428,44 @@ class Counter extends Plugin
         </li>
         <li class="mo-in-ul-li ui-widget-content counter-admin-li">
             <div class="counter-admin-subheader">'
-            . $this->_admin_lang->getLanguageValue('admin_test')
+            . $this->_admin_lang->getLanguageValue('admin_date_times')
             . '</div>
             <div style="margin-bottom:5px;">
-                {test1_text}
-                {test1_description}
+                {resetdatum_text}
+                {resetdatum_description}
                 <span class="counter-admin-default">
-                    [' . /*$this->_confdefault['test1'][0] .*/']
+                    [' . $this->_confdefault['resetdatum'][0] .']
                 </span>
             </div>
             <div style="margin-bottom:5px;">
-                {test2_text}
-                {test2_description}
+                {mintime_text}
+                {mintime_description}
                 <span class="counter-admin-default">
-                    [' . /*$this->_confdefault['test2'][0] .*/']
+                    [' . $this->_confdefault['mintime'][0] .']
                 </span>
+            </div>
+            <div style="margin-bottom:5px;">
+                {reload_text}
+                {reload_description}
+                <span class="counter-admin-default">
+                    [' . $this->_confdefault['reload'][0] .']
+                </span>
+            </div>
+        </li>
+        <li class="mo-in-ul-li ui-widget-content counter-admin-li">
+            <div class="counter-admin-subheader">'
+            . $this->_admin_lang->getLanguageValue('admin_template')
+            . '</div>
+            <div style="margin-bottom:5px;">
+                <div style="float:left;margin-right: 10px;">
+                    {template_textarea}
+                </div>
+                {template_description}<br />
+                <pre>' . $template_elements . '</pre>
+                <span class="counter-admin-default">
+                    [' . $this->_confdefault['template'][0] .']
+                </span>
+                <br style="clear:both;" />
         ';
 
         $config['--template~~'] = $template;
@@ -497,7 +514,8 @@ class Counter extends Plugin
             self::MOZILO_VERSION,
             $this->_admin_lang->getLanguageValue(
                 'description',
-                htmlspecialchars($this->_plugin_tags['tag'])
+                htmlspecialchars($this->_plugin_tags['tag']),
+                htmlspecialchars($this->_plugin_tags['tagreset'])
             ),
             self::PLUGIN_AUTHOR,
             self::PLUGIN_DOCU,
@@ -566,7 +584,7 @@ class Counter extends Plugin
     ) {
         // required properties
         $conftext = array(
-            'type' => 'text',
+            'type' => 'textarea',
             'description' => $description,
         );
         // optional properties

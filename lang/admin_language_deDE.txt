@@ -1,8 +1,11 @@
-toolbar_platzhalter 			= Counter einfügen
-config_description 				= Zählt die Seitenbesucher. <br /><br /><span style='font-weight:bold'>Nutzung:</span><br />{Counter} Gibt den Counter zurück, je nach Konfiguration<br />z.B. "Online: 3 | Heute: 39 | Gestern: 83 | Rekord: 163 | Ø: 55.3 | Gesamt: 13304"<br />Wenn die Besucher einer gesamten Website gezählt werden sollen, muss das {Counter} Tag in die template.html des verwendeten Templates gesetzt werden (z.B in den Footer).<br />{Counter|resetdate} Gibt das Resetdatum zurück.<br /><br /><span style='font-weight:bold'>Konfiguration:</span><br /><span style='font-style:italic'>Trennzeichen</span>: Das Zeichen, welches zwischen dein einzelnen Counterelementen steht. Wenn die Counterelemente untereinander angezeigt werden sollen, einfach das <br />-Tag als Trennzeichen notieren.<br /><span style='font-style:italic'>Reset Datum</span>: Datum, ab wann der Counter zählt (relevant für die Durchschnittsermittlung) der Form "01 April 2012" (orientiert sich an der PHP-Funktion date())<br /><span style='font-style:italic'>Aufenthaltszeit</span>: Mindestaufenthalt in Sekunden für gültige Zählung<br /><span style='font-style:italic'>Reloadsperre:</span>Zeit in Sekunden zwischen 2 gültigen Zählungen der gleichen IP<br />Einzelne Counterelemente können mithilfe der Checkboxen aktiviert/deaktiviert werden.<br /><br /><span style='font-weight:bold'>Dokumentation:</span><br />Ausführlichere Informationen sind in der docu.htm im Pluginverzeichnis zu finden. Die Dokumentation liegt momentan nur in deutscher Sprache vor.
-config_resetdatum 				= Reset Datum
-config_aufenthalt 				= Aufenthaltszeit (in sec)
-config_aufenthalt_error 		= Die Eingabe darf nur Zahlen enthalten.
-config_reload 					= Reloadsperre (in sec)
-config_reload_error 			= Die Eingabe darf nur Zahlen enthalten.
-config_template					= Hier das Template für den Counter konfigurieren: {ONLINE} {TODAY} {YESTERDAY} {MAXIMUM} {AVERAGE} {TOTAL} {DATE}
+tag                     = Fügt den Counter ein
+description      = Zählt die Seitenbesucher. <br /><br /><span style='font-weight:bold'>Nutzung:</span><br /><span style='font-family:monospace;margin:3px 3px; background-color:#eee;border:1px dotted #aaa;'>{PARAM1}</span> Gibt den Counter und je nach Konfiguration bestimmte Counterelemente zurück.<br /><br /><span style='font-family:monospace;margin:3px 3px; background-color:#eee;border:1px dotted #aaa;'>{PARAM2}</span> Gibt das Resetdatum zurück.<br /><br /><span style='font-weight:bold'>Dokumentation:</span><br />Eine ausführliche Dokumentation ist auf <span style="font-style:italic">www.devmount.de</span> zu finden (siehe obenstehender Link).
+config_resetdatum               = Resetdatum
+config_mintime                  = Aufenthaltszeit (in sec)
+config_mintime_error            = Die Eingabe darf nur Zahlen enthalten.
+config_reload                   = Reloadsperre (in sec)
+config_reload_error             = Die Eingabe darf nur Zahlen enthalten.
+config_template                 = Hier das Template für den Counter konfigurieren. Folgende Elemente sind möglich:
+admin_header = {PARAM1} Plugin Konfiguration
+admin_date_times = Datum und Zeiten
+admin_template = Template
