@@ -144,8 +144,8 @@ class Counter extends Plugin
         $vorhanden      = 0;
 
         // check if IP exists
-        foreach($linearray as $sperre) {
-            $arraysp = explode('#',$sperre);
+        foreach ($linearray as $sperre) {
+            $arraysp = explode('#', $sperre);
             if ($ip == trim($arraysp[1]) && $arraysp[0] > $time - $reload) {
                 $vorhanden = 1;
             }
@@ -153,7 +153,7 @@ class Counter extends Plugin
 
         // get day and total number
         foreach ($linearray as $line) {
-            $line = explode('#',$line);
+            $line = explode('#', $line);
             if ($line[0]=='datum' && trim($line[1]) != $current_date) {
                 $setdate = 1;
             }
@@ -218,27 +218,26 @@ class Counter extends Plugin
         $contenttowrite .= 'gesamt' . '#' . $gesamt . "\n";
         $contenttowrite .= 'max' . '#' . $max . "\n";
         $contenttowrite .= $time . '#' . $ip . "\n";;
-        $dbfile = fopen($filename , 'w');
+        $dbfile = fopen($filename, 'w');
 
         // exclusive lock
         if (flock($dbfile, LOCK_EX)) {
-            fwrite ($dbfile, $contenttowrite);
+            fwrite($dbfile, $contenttowrite);
             // free lock
             flock($dbfile, LOCK_UN);
         }
         fclose($dbfile);
 
         // write online count
-        $dbfile = fopen($filename , 'a');
-        foreach($linearray as $useronline) {
-            $useronlinearray = explode('#',$useronline);
-            if (
-                ($useronlinearray[0] > $time - $countgueltig)
+        $dbfile = fopen($filename, 'a');
+        foreach ($linearray as $useronline) {
+            $useronlinearray = explode('#', $useronline);
+            if (($useronlinearray[0] > $time - $countgueltig)
                 && ($ip != rtrim($useronlinearray[1]))
             ) {
                 // exclusive lock
                 if (flock($dbfile, LOCK_EX)) {
-                    fwrite ($dbfile,$useronline);
+                    fwrite($dbfile, $useronline);
                     // free lock
                     flock($dbfile, LOCK_UN);
                 }
@@ -266,13 +265,6 @@ class Counter extends Plugin
         $conf_template  = $conf['template'];
 
         // write output
-        $online    = '';
-        $today     = '';
-        $yesterday = '';
-        $maximum   = '';
-        $average   = '';
-        $total     = '';
-
         $online
             = $this->_cms_lang->getLanguageValue('count_online') . ' ' . $count;
         $today
