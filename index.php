@@ -28,6 +28,9 @@ if (!defined('IS_CMS')) {
     die();
 }
 
+// add database class
+require_once "database.php";
+
 /**
  * Counter Class
  *
@@ -150,9 +153,9 @@ class Counter extends Plugin
         $locked_ip        = false;
 
         // check if IP exists
-        foreach ($lines as $sperre) {
-            $arraysp = explode('#', $sperre);
-            if ($ip == trim($arraysp[1]) && $arraysp[0] > $time - $conf['reload']) {
+        foreach ($lines as $line) {
+            list($tstamp, $storedip) = explode('#', $line);
+            if ($ip == trim($storedip) && $tstamp > $time - $conf['reload']) {
                 $locked_ip = true;
             }
         }
