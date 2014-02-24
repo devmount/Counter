@@ -79,7 +79,7 @@ class Counter extends Plugin
      */
     private $_confdefault = array(
         'resetdate' => array(
-            'd.m.Y',
+            '20140101',
             'text',
             '50',
             '15',
@@ -141,59 +141,50 @@ class Counter extends Plugin
         $filename         = 'plugins/Counter/counterdb.txt';
         $lines            = file($filename);
         $current_date     = date('d.m.y');
-        $setdate          = 0;
+        $setdate          = false;
         $resetdate        = $conf['resetdate'];
         $max              = 1;
         $average          = 0;
         $tstamp_yesterday = mktime(0, 0, 0, date('m'), date('d')-1, date('Y'));
         $date_yesterday   = date('Y-m-d', $tstamp_yesterday);
-        $locked_ip        = 0;
+        $locked_ip        = false;
 
         // check if IP exists
         foreach ($lines as $sperre) {
             $arraysp = explode('#', $sperre);
             if ($ip == trim($arraysp[1]) && $arraysp[0] > $time - $conf['reload']) {
-                $locked_ip = 1;
+                $locked_ip = true;
             }
         }
 
         // get day and total number
         foreach ($lines as $line) {
             $line = explode('#', $line);
-            if ($line[0]=='datum' && trim($line[1]) != $current_date) {
-                $setdate = 1;
+            $numb = trim($line[1]);
+            if ($line[0] == 'datum' && $numb != $current_date) {
+                $setdate = true;
             }
-            if ($locked_ip==1) {
-                if ($line[0] == 'heute' && $setdate == 0) {
-                    $today = trim($line[1]);
+            if ($line[0] == 'heute' && !$setdate) {
+                $today = $numb;
+                if (!$locked_ip) {
+                    ++$today;
                 }
-                if ($line[0] == 'heute' && $setdate == 1) {
-                    $today = 1;
-                    $yesterday = trim($line[1]);
-                }
-                if ($line[0] == 'gesamt') {
-                    $total = trim($line[1]);
-                }
-                if ($line[0] == 'gestern' && $setdate == 0) {
-                    $yesterday = trim($line[1]);
-                }
-            } else {
-                if ($line[0]=='heute' && $setdate == 0) {
-                    $today = trim($line[1]) + 1;
-                }
-                if ($line[0]=='heute' && $setdate == 1) {
-                    $today = 1;
-                    $yesterday=trim($line[1]);
-                }
-                if ($line[0]=='gestern' && $setdate == 0) {
-                    $yesterday = trim($line[1]);
-                }
-                if ($line[0]=='gesamt') {
-                    $total = trim($line[1]) + 1;
+            }
+            if ($line[0] == 'heute' && $setdate) {
+                $today = 1;
+                $yesterday = $numb;
+            }
+            if ($line[0] == 'gestern' && !$setdate) {
+                $yesterday = $numb;
+            }
+            if ($line[0] == 'gesamt') {
+                $total = $numb;
+                if (!$locked_ip) {
+                    ++$total;
                 }
             }
             if ($line[0] == 'max') {
-                $max = trim($line[1]);
+                $max = $numb;
             }
         }
 
@@ -217,18 +208,18 @@ class Counter extends Plugin
         }
 
         // write day, total, maximal counts
-        $contenttowrite = '';
-        $contenttowrite .= 'datum' . '#' . $current_date . "\n";
-        $contenttowrite .= 'heute' . '#' . $today . "\n";
-        $contenttowrite .= 'gestern' . '#' . $yesterday . "\n";
-        $contenttowrite .= 'gesamt' . '#' . $total . "\n";
-        $contenttowrite .= 'max' . '#' . $max . "\n";
-        $contenttowrite .= $time . '#' . $ip . "\n";
+        $content = '';
+        $content .= 'datum' . '#' . $current_date . "\n";
+        $content .= 'heute' . '#' . $today . "\n";
+        $content .= 'gestern' . '#' . $yesterday . "\n";
+        $content .= 'gesamt' . '#' . $total . "\n";
+        $content .= 'max' . '#' . $max . "\n";
+        $content .= $time . '#' . $ip . "\n";
         $dbfile = fopen($filename, 'w');
 
         // exclusive lock
         if (flock($dbfile, LOCK_EX)) {
-            fwrite($dbfile, $contenttowrite);
+            fwrite($dbfile, $content);
             // free lock
             flock($dbfile, LOCK_UN);
         }
@@ -253,7 +244,7 @@ class Counter extends Plugin
 
         // evaluate average
         $dayspan = bcdiv(
-            (strtotime(date($date_yesterday )) - strtotime($resetdate)),
+            (strtotime(date($date_yesterday)) - strtotime($resetdate)),
             86400,
             0
         );
@@ -267,36 +258,24 @@ class Counter extends Plugin
         $werte = file($filename);
         $online = count($werte)-5;
 
-        // load template
-        $conf_template = $conf['template'];
-
         // initialize return content, begin plugin content
         $counter = '<!-- BEGIN ' . self::PLUGIN_TITLE . ' plugin content --> ';
 
-        if (isset($conf_template)) {
-            $counter .= $conf_template;
-            $counter = str_replace(
-                $this->_template_elements,
-                array($online,
-                    $today,
-                    $yesterday,
-                    $max,
-                    $average,
-                    $total,
-                    $resetdate,
-                ),
-                $counter
-            );
-        } else {
+        // fill template
+        $counter .= $conf['template'];
+        $counter = str_replace(
+            $this->_template_elements,
+            array($online,
+                $today,
+                $yesterday,
+                $max,
+                $average,
+                $total,
+                $resetdate,
+            ),
             $counter
-                .= $online . ' '
-                . $today . ' '
-                . $yesterday . ' '
-                . $max . ' '
-                . $average . ' '
-                . $total . ' '
-                . $resetdate;
-        }
+        );
+
 
         // end plugin content
         $counter .= '<!-- END ' . self::PLUGIN_TITLE . ' plugin content --> ';
