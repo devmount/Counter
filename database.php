@@ -20,7 +20,7 @@
  */
 
 /**
- * Database Class
+ * CounterDatabase Class
  *
  * @category PHP
  * @package  PHP_MoziloPlugins
@@ -28,7 +28,7 @@
  * @license  GPL v3
  * @link     none
  */
-class Database
+class CounterDatabase
 {
     /**
      * saves file from multiple access

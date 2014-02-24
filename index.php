@@ -142,7 +142,11 @@ class Counter extends Plugin
         $time             = time();
         $ip               = getenv(REMOTE_ADDR);
         $filename         = 'plugins/Counter/counterdb.txt';
+        $fileips          = $this->PLUGIN_SELF_DIR . 'data/ips.conf.php';
+        $filedata         = $this->PLUGIN_SELF_DIR . 'data/data.conf.php';
         $lines            = file($filename);
+        $iplist           = CounterDatabase::loadArray($fileips);
+        $datalist         = CounterDatabase::loadArray($filedata);
         $current_date     = date('d.m.y');
         $setdate          = false;
         $resetdate        = $conf['resetdate'];
@@ -151,6 +155,18 @@ class Counter extends Plugin
         $tstamp_yesterday = mktime(0, 0, 0, date('m'), date('d')-1, date('Y'));
         $date_yesterday   = date('Y-m-d', $tstamp_yesterday);
         $locked_ip        = false;
+
+        // initialize database
+        if (empty($datalist)) {
+            $datalist = array(
+                'date' => 0,
+                'today' => 0,
+                'yesterday' => 0,
+                'total' => 0,
+                'max' => 0,
+            );
+            CounterDatabase::saveArray($filedata, $datalist);
+        }
 
         // check if IP exists
         foreach ($lines as $line) {
