@@ -137,24 +137,19 @@ class Counter extends Plugin
                 : $this->settings->get($elem);
         }
 
-        // initialize values
-        $online           = 0;
-        $time             = time();
-        $ip               = getenv(REMOTE_ADDR);
-        $filename         = 'plugins/Counter/counterdb.txt';
-        $fileips          = $this->PLUGIN_SELF_DIR . 'data/ips.conf.php';
-        $filedata         = $this->PLUGIN_SELF_DIR . 'data/data.conf.php';
-        $lines            = file($filename);
-        $iplist           = CounterDatabase::loadArray($fileips);
-        $datalist         = CounterDatabase::loadArray($filedata);
-        $current_date     = date('d.m.y');
-        $setdate          = false;
-        $resetdate        = $conf['resetdate'];
-        $max              = 1;
-        $average          = 0;
-        $tstamp_yesterday = mktime(0, 0, 0, date('m'), date('d')-1, date('Y'));
-        $date_yesterday   = date('Y-m-d', $tstamp_yesterday);
-        $locked_ip        = false;
+        // initialize basic values
+        $online    = 0;
+        $time      = time();
+        $date      = date('d.m.y');
+        $ip        = getenv(REMOTE_ADDR);
+        $fileips   = $this->PLUGIN_SELF_DIR . 'data/ips.conf.php';
+        $filedata  = $this->PLUGIN_SELF_DIR . 'data/data.conf.php';
+        $iplist    = CounterDatabase::loadArray($fileips);
+        $datalist  = CounterDatabase::loadArray($filedata);
+        $setdate   = false;
+        $locked_ip = false;
+        $max       = 1;
+        $average   = 0;
 
         // initialize counter database
         if (empty($datalist)) {
@@ -190,8 +185,8 @@ class Counter extends Plugin
         }
 
         // handle day switch
-        if ($datalist['date'] != $current_date) {
-            $datalist['date'] = $current_date;
+        if ($datalist['date'] != $date) {
+            $datalist['date'] = $date;
             $setdate = true;
         }
         // increment total count when ip not already registered
@@ -224,12 +219,11 @@ class Counter extends Plugin
 
         // evaluate average
         $dayspan = bcdiv(
-            (strtotime(date($date_yesterday)) - strtotime($resetdate)),
-            86400,
-            0
+            (strtotime($date) - strtotime($conf['resetdate'])), 86400, 0
         );
         if ($dayspan > 0) {
-            $average = round((($total - $today)/$dayspan), 1);
+            $average
+                = round((($datalist['total'] - $datalist['today'])/$dayspan), 1);
         } else {
             $average = 0;
         }
@@ -250,7 +244,7 @@ class Counter extends Plugin
                 $datalist['max'],
                 $average,
                 $datalist['total'],
-                $resetdate,
+                $conf['resetdate'],
             ),
             $counter
         );
