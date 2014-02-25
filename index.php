@@ -156,7 +156,7 @@ class Counter extends Plugin
         $date_yesterday   = date('Y-m-d', $tstamp_yesterday);
         $locked_ip        = false;
 
-        // initialize database
+        // initialize counter database
         if (empty($datalist)) {
             $datalist = array(
                 'date' => 0,
@@ -167,99 +167,60 @@ class Counter extends Plugin
             );
             CounterDatabase::saveArray($filedata, $datalist);
         }
-
-        // check if IP exists
-        foreach ($lines as $line) {
-            list($tstamp, $storedip) = explode('#', $line);
-            if ($ip == trim($storedip) && $tstamp > $time - $conf['reload']) {
-                $locked_ip = true;
-            }
-        }
-
-        // get day and total number
-        foreach ($lines as $line) {
-            $line = explode('#', $line);
-            $numb = trim($line[1]);
-            if ($line[0] == 'datum' && $numb != $current_date) {
-                $setdate = true;
-            }
-            if ($line[0] == 'heute' && !$setdate) {
-                $today = $numb;
-                if (!$locked_ip) {
-                    ++$today;
+        // initialize ip database
+        if (empty($iplist)) {
+            $iplist = array(
+                $ip => $time,
+            );
+            CounterDatabase::saveArray($fileips, $iplist);
+        } else {
+            // ip does not exist yet: append it
+            if (!array_key_exists($ip, $iplist)) {
+                CounterDatabase::appendArray($fileips, array($ip => $time));
+            } else {
+                // ip is locked, when still in reload time
+                if ($iplist[$ip] > $time - $conf['reload']) {
+                    $locked_ip = true;
+                } else {
+                    // otherwise its time will be updated
+                    $iplist[$ip] = $time;
+                    CounterDatabase::saveArray($fileips, $iplist);
                 }
             }
-            if ($line[0] == 'heute' && $setdate) {
-                $today = 1;
-                $yesterday = $numb;
-            }
-            if ($line[0] == 'gestern' && !$setdate) {
-                $yesterday = $numb;
-            }
-            if ($line[0] == 'gesamt') {
-                $total = $numb;
-                if (!$locked_ip) {
-                    ++$total;
-                }
-            }
-            if ($line[0] == 'max') {
-                $max = $numb;
-            }
         }
 
-        // initialize counts
-        if ($today == '') {
-            $today = 0;
+        // handle day switch
+        if ($datalist['date'] != $current_date) {
+            $datalist['date'] = $current_date;
+            $setdate = true;
         }
-        if ($yesterday == '') {
-            $yesterday = 0;
-        }
-        if ($max == '') {
-            $max = 0;
-        }
-        if ($total == '') {
-            $total = 0;
+        // increment total count when ip not already registered
+        if (!$locked_ip) {
+            ++$datalist['total'];
+            // increment today count when it's still today
+            if (!$setdate) {
+                ++$datalist['today'];
+            } else {
+                // new day
+                $datalist['yesterday'] = $datalist['today'];
+                $datalist['today'] = 1;
+            }
         }
 
         // build maximum
-        if ($today > $max) {
-            $max = $today;
+        if ($datalist['today'] > $datalist['max']) {
+            $datalist['max'] = $datalist['today'];
         }
 
-        // write day, total, maximal counts
-        $content = '';
-        $content .= 'datum' . '#' . $current_date . "\n";
-        $content .= 'heute' . '#' . $today . "\n";
-        $content .= 'gestern' . '#' . $yesterday . "\n";
-        $content .= 'gesamt' . '#' . $total . "\n";
-        $content .= 'max' . '#' . $max . "\n";
-        $content .= $time . '#' . $ip . "\n";
-        $dbfile = fopen($filename, 'w');
+        // write current values to database
+        CounterDatabase::saveArray($filedata, $datalist);
 
-        // exclusive lock
-        if (flock($dbfile, LOCK_EX)) {
-            fwrite($dbfile, $content);
-            // free lock
-            flock($dbfile, LOCK_UN);
-        }
-        fclose($dbfile);
-
-        // write online count
-        $dbfile = fopen($filename, 'a');
-        foreach ($lines as $useronline) {
-            $useronlinearray = explode('#', $useronline);
-            if (($useronlinearray[0] > $time - $conf['mintime'])
-                && ($ip != rtrim($useronlinearray[1]))
-            ) {
-                // exclusive lock
-                if (flock($dbfile, LOCK_EX)) {
-                    fwrite($dbfile, $useronline);
-                    // free lock
-                    flock($dbfile, LOCK_UN);
-                }
+        // if ip not online anymore, delete ip
+        foreach ($iplist as $ipdata => $iptime) {
+            if ($iptime < $time - $conf['mintime']) {
+                CounterDatabase::deleteEntry($fileips, $ipdata);
             }
         }
-        fclose($dbfile);
 
         // evaluate average
         $dayspan = bcdiv(
@@ -274,8 +235,7 @@ class Counter extends Plugin
         }
 
         // get online count
-        $werte = file($filename);
-        $online = count($werte)-5;
+        $online = count($iplist);
 
         // initialize return content, begin plugin content
         $counter = '<!-- BEGIN ' . self::PLUGIN_TITLE . ' plugin content --> ';
@@ -285,11 +245,11 @@ class Counter extends Plugin
         $counter = str_replace(
             $this->_template_elements,
             array($online,
-                $today,
-                $yesterday,
-                $max,
+                $datalist['today'],
+                $datalist['yesterday'],
+                $datalist['max'],
                 $average,
-                $total,
+                $datalist['total'],
                 $resetdate,
             ),
             $counter
