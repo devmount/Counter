@@ -223,12 +223,12 @@ class Counter extends Plugin
         // evaluate average
         $dayspan = bcdiv(
             (strtotime($date) - strtotime($conf['resetdate'])), 86400, 0
-        );
+        ) - 1;
         if ($dayspan > 0) {
             $average
                 = round((($datalist['total'] - $datalist['today'])/$dayspan), 1);
         } else {
-            $average = 0;
+            $average = '-';
         }
 
         // get online count
