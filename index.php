@@ -82,7 +82,14 @@ class Counter extends Plugin
      */
     private $_confdefault = array(
         'resetdate' => array(
-            '20140101',
+            '2014-01-01',
+            'text',
+            '50',
+            '15',
+            '',
+        ),
+        'dateformat' => array(
+            'd.m.Y',
             'text',
             '50',
             '15',
@@ -228,6 +235,7 @@ class Counter extends Plugin
             $average
                 = round((($datalist['total'] - $datalist['today'])/$dayspan), 1);
         } else {
+            // too less data for average
             $average = '-';
         }
 
@@ -247,7 +255,7 @@ class Counter extends Plugin
                 $datalist['max'],
                 $average,
                 $datalist['total'],
-                $conf['resetdate'],
+                date($conf['dateformat'], strtotime($conf['resetdate'])),
             ),
             $counter
         );
@@ -386,6 +394,13 @@ class Counter extends Plugin
                 {resetdate_description}
                 <span class="counter-admin-default">
                     [' . $this->_confdefault['resetdate'][0] .']
+                </span>
+            </div>
+            <div style="margin-bottom:5px;">
+                {dateformat_text}
+                {dateformat_description}
+                <span class="counter-admin-default">
+                    [' . $this->_confdefault['dateformat'][0] .']
                 </span>
             </div>
             <div style="margin-bottom:5px;">

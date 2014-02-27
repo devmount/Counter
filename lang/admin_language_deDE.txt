@@ -1,9 +1,10 @@
 tag                  = Fügt den Counter ein
 description          = Zählt die Seitenbesucher. <br /><br /><span style='font-weight:bold'>Nutzung:</span><br /><span style='font-family:monospace;margin:3px 3px; background-color:#eee;border:1px dotted #aaa;'>{PARAM1}</span> Gibt den Counter und je nach Konfiguration bestimmte Counterelemente zurück.<br /><br /><span style='font-weight:bold'>Dokumentation:</span><br />Eine ausführliche Dokumentation ist auf <span style="font-style:italic">www.devmount.de</span> zu finden (siehe obenstehender Link).
-config_resetdate     = Resetdatum
-config_mintime       = Aufenthaltszeit (in sec)
+config_resetdate     = Resetdatum (z.B. der Form: YYYY-MM-DD)
+config_dateformat    = Datumsformat
+config_mintime       = Aufenthaltszeit (in Sekunden)
 config_mintime_error = Die Eingabe darf nur Zahlen enthalten.
-config_reload        = Reloadsperre (in sec)
+config_reload        = Reloadsperre (in Sekunden)
 config_reload_error  = Die Eingabe darf nur Zahlen enthalten.
 config_template      = Hier das Template für den Counter konfigurieren. Folgende Elemente sind möglich:
 admin_header         = {PARAM1} Plugin Konfiguration
