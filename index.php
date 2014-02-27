@@ -171,7 +171,8 @@ class Counter extends Plugin
         } else {
             // ip does not exist yet: append it
             if (!array_key_exists($ip, $iplist)) {
-                CounterDatabase::appendArray($fileips, array($ip => $time));
+                $iplist[$ip] = $time;
+                CounterDatabase::saveArray($fileips, $iplist);
             } else {
                 // ip is locked, when still in reload time
                 if ($iplist[$ip] > $time - $conf['reload']) {
@@ -211,11 +212,13 @@ class Counter extends Plugin
         CounterDatabase::saveArray($filedata, $datalist);
 
         // if ip not online anymore, delete ip
+        // print_r($iplist);
         foreach ($iplist as $ipdata => $iptime) {
             if ($iptime < $time - $conf['mintime']) {
-                CounterDatabase::deleteEntry($fileips, $ipdata);
+                unset($iplist[$ipdata]);
             }
         }
+        CounterDatabase::saveArray($fileips, $iplist);
 
         // evaluate average
         $dayspan = bcdiv(
