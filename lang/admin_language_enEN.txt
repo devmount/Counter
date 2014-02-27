@@ -1,8 +1,12 @@
-toolbar_platzhalter				= insert Counter
-config_description				= Counts the visitors. <br /><br /><span style='font-weight:bold'>Use:</span><br />{Counter} returns the Counter, depends on configuration<br />e.g. "Online: 3 | Today: 39 | Yesterday: 83 | Record: 163 | Ø: 55.3 | Total: 13304"<br />To count the visitors of the whole website it is useful to put the {Counter} Tag into the template.html of the current template (e.g into the footer).<br />{Counter|resetdate} returns the reset date.<br /><br /><span style='font-weight:bold'>Configuration:</span><br /><span style='font-style:italic'>Separator</span>: the sign between the different counter elements. If the counter elements shall display vertically, just use the br tag as seperator.<br /><span style='font-style:italic'>Reset Date</span>: date, when counting began (relevant for calculation of average) like "01 April 2012" (based on PHP function date())<br /><span style='font-style:italic'>Residence time</span>: Minimum Stay in seconds for valid count<br /><span style='font-style:italic'>Reload lock:</span>time in seconds between 2 valid counts of the same IP<br />Single Counter elements can be activated/deactivated with the help of the checkboxes.<br /><br /><span style='font-weight:bold'>Documentation:</span><br />More informationen can be found in the readme.txt in the plugin directory, or on<br />www.ap-intermedia.de/bieten/software/
-config_resetdatum				= Reset Date
-config_aufenthalt 				= Residence time (in sec)
-config_aufenthalt_error			= Input may only contain numbers.
-config_reload					= Reload lock (in sec)
-config_reload_error 			= Input may only contain numbers.
-config_template					= Here the template for the Counter can be configured: {ONLINE} {TODAY} {YESTERDAY} {MAXIMUM} {AVERAGE} {TOTAL} {DATE}
+tag                  = Inserts the Counter
+description          = Counts the visitors. <br /><br /><span style='font-weight:bold'>Use:</span><br /><span style='font-family:monospace;margin:3px 3px; background-color:#eee;border:1px dotted #aaa;'>{PARAM1}</span> Returns the Counter and certain counter elements, depending on configuration.<br /><br /><span style='font-weight:bold'>Documentation:</span><br />A detailed documentation can be found on <span style="font-style:italic;">www.devmount.de </span> (link above).
+config_resetdate     = Reset date (e.g. like: YYYY-MM-DD)
+config_dateformat    = Date format
+config_mintime       = Stying time (in seconds)
+config_mintime_error = Input must only contain numbers.
+config_reload        = Reload lock (in seconds)
+config_reload_error  = Input must only contain numbers.
+config_template      = Counter Template configuration. These elements are possible:
+admin_header         = {PARAM1} Plugin Configuration
+admin_date_times     = Date und Time
+admin_template       = Template
