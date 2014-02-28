@@ -61,6 +61,7 @@ class Counter extends Plugin
         '#TODAY#',
         '#YESTERDAY#',
         '#MAXIMUM#',
+        '#MAXIMUMDATE#',
         '#AVERAGE#',
         '#TOTAL#',
         '#DATE#',
@@ -166,6 +167,7 @@ class Counter extends Plugin
                 'yesterday' => 0,
                 'total' => 0,
                 'max' => 0,
+                'maxdate' => 0,
             );
             CounterDatabase::saveArray($filedata, $datalist);
         }
@@ -213,6 +215,7 @@ class Counter extends Plugin
         // build maximum
         if ($datalist['today'] > $datalist['max']) {
             $datalist['max'] = $datalist['today'];
+            $datalist['maxdate'] = $time;
         }
 
         // write current values to database
@@ -253,13 +256,13 @@ class Counter extends Plugin
                 $datalist['today'],
                 $datalist['yesterday'],
                 $datalist['max'],
+                date($conf['dateformat'], $datalist['maxdate']),
                 $average,
                 $datalist['total'],
                 date($conf['dateformat'], strtotime($conf['resetdate'])),
             ),
             $counter
         );
-
 
         // end plugin content
         $counter .= '<!-- END ' . self::PLUGIN_TITLE . ' plugin content --> ';
