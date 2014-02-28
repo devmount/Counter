@@ -43,7 +43,7 @@ require_once "database.php";
 class Counter extends Plugin
 {
     // language
-    private $_admin_lang;
+    public $admin_lang;
     private $_cms_lang;
 
     // plugin information
@@ -279,17 +279,26 @@ class Counter extends Plugin
     {
         $config = array();
 
+        // create button to administration area
+        $config['--admin~~'] = array(
+            'buttontext' =>
+                $this->admin_lang->getLanguageValue('admin_buttontext'),
+            'description' =>
+                $this->admin_lang->getLanguageValue('admin_buttondescription'),
+            'datei_admin' => 'admin.php',
+        );
+
         // read configuration values
         foreach ($this->_confdefault as $key => $value) {
             // handle each form type
             switch ($value[1]) {
             case 'text':
                 $config[$key] = $this->confText(
-                    $this->_admin_lang->getLanguageValue('config_' . $key),
+                    $this->admin_lang->getLanguageValue('config_' . $key),
                     $value[2],
                     $value[3],
                     $value[4],
-                    $this->_admin_lang->getLanguageValue(
+                    $this->admin_lang->getLanguageValue(
                         'config_' . $key . '_error'
                     )
                 );
@@ -297,11 +306,11 @@ class Counter extends Plugin
 
             case 'textarea':
                 $config[$key] = $this->confTextarea(
-                    $this->_admin_lang->getLanguageValue('config_' . $key),
+                    $this->admin_lang->getLanguageValue('config_' . $key),
                     $value[2],
                     $value[3],
                     $value[4],
-                    $this->_admin_lang->getLanguageValue(
+                    $this->admin_lang->getLanguageValue(
                         'config_' . $key . '_error'
                     )
                 );
@@ -309,11 +318,11 @@ class Counter extends Plugin
 
             case 'password':
                 $config[$key] = $this->confPassword(
-                    $this->_admin_lang->getLanguageValue('config_' . $key),
+                    $this->admin_lang->getLanguageValue('config_' . $key),
                     $value[2],
                     $value[3],
                     $value[4],
-                    $this->_admin_lang->getLanguageValue(
+                    $this->admin_lang->getLanguageValue(
                         'config_' . $key . '_error'
                     ),
                     $value[5]
@@ -322,19 +331,19 @@ class Counter extends Plugin
 
             case 'check':
                 $config[$key] = $this->confCheck(
-                    $this->_admin_lang->getLanguageValue('config_' . $key)
+                    $this->admin_lang->getLanguageValue('config_' . $key)
                 );
                 break;
 
             case 'radio':
                 $descriptions = array();
                 foreach ($value[2] as $label) {
-                    $descriptions[$label] = $this->_admin_lang->getLanguageValue(
+                    $descriptions[$label] = $this->admin_lang->getLanguageValue(
                         'config_' . $key . '_' . $label
                     );
                 }
                 $config[$key] = $this->confRadio(
-                    $this->_admin_lang->getLanguageValue('config_' . $key),
+                    $this->admin_lang->getLanguageValue('config_' . $key),
                     $descriptions
                 );
                 break;
@@ -342,12 +351,12 @@ class Counter extends Plugin
             case 'select':
                 $descriptions = array();
                 foreach ($value[2] as $label) {
-                    $descriptions[$label] = $this->_admin_lang->getLanguageValue(
+                    $descriptions[$label] = $this->admin_lang->getLanguageValue(
                         'config_' . $key . '_' . $label
                     );
                 }
                 $config[$key] = $this->confSelect(
-                    $this->_admin_lang->getLanguageValue('config_' . $key),
+                    $this->admin_lang->getLanguageValue('config_' . $key),
                     $descriptions,
                     $value[3]
                 );
@@ -376,10 +385,10 @@ class Counter extends Plugin
 
         // build Template
         $template .= '
-            <div class="counter-admin-header">
+            <div class="counter-index-header">
             <span>'
-                . $this->_admin_lang->getLanguageValue(
-                    'admin_header',
+                . $this->admin_lang->getLanguageValue(
+                    'index_header',
                     self::PLUGIN_TITLE
                 )
             . '</span>
@@ -388,42 +397,42 @@ class Counter extends Plugin
             </a>
             </div>
         </li>
-        <li class="mo-in-ul-li ui-widget-content counter-admin-li">
-            <div class="counter-admin-subheader">'
-            . $this->_admin_lang->getLanguageValue('admin_date_times')
+        <li class="mo-in-ul-li ui-widget-content counter-index-li">
+            <div class="counter-index-subheader">'
+            . $this->admin_lang->getLanguageValue('admin_date_times')
             . '</div>
             <div style="margin-bottom:5px;">
                 {resetdate_text}
                 {resetdate_description}
-                <span class="counter-admin-default">
+                <span class="counter-index-default">
                     [' . $this->_confdefault['resetdate'][0] .']
                 </span>
             </div>
             <div style="margin-bottom:5px;">
                 {dateformat_text}
                 {dateformat_description}
-                <span class="counter-admin-default">
+                <span class="counter-index-default">
                     [' . $this->_confdefault['dateformat'][0] .']
                 </span>
             </div>
             <div style="margin-bottom:5px;">
                 {mintime_text}
                 {mintime_description}
-                <span class="counter-admin-default">
+                <span class="counter-index-default">
                     [' . $this->_confdefault['mintime'][0] .']
                 </span>
             </div>
             <div style="margin-bottom:5px;">
                 {reload_text}
                 {reload_description}
-                <span class="counter-admin-default">
+                <span class="counter-index-default">
                     [' . $this->_confdefault['reload'][0] .']
                 </span>
             </div>
         </li>
-        <li class="mo-in-ul-li ui-widget-content counter-admin-li">
-            <div class="counter-admin-subheader">'
-            . $this->_admin_lang->getLanguageValue('admin_template')
+        <li class="mo-in-ul-li ui-widget-content counter-index-li">
+            <div class="counter-index-subheader">'
+            . $this->admin_lang->getLanguageValue('admin_template')
             . '</div>
             <div style="margin-bottom:5px;">
                 <div style="float:left;margin-right: 10px;">
@@ -431,7 +440,7 @@ class Counter extends Plugin
                 </div>
                 {template_description}<br />
                 <pre>' . $template_elements . '</pre>
-                <span class="counter-admin-default">
+                <span class="counter-index-default">
                     [' . $this->_confdefault['template'][0] .']
                 </span>
                 <br style="clear:both;" />
@@ -465,7 +474,7 @@ class Counter extends Plugin
     function getInfo()
     {
         global $ADMIN_CONF;
-        $this->_admin_lang = new Language(
+        $this->admin_lang = new Language(
             $this->PLUGIN_SELF_DIR
             . 'lang/admin_language_'
             . $ADMIN_CONF->get('language')
@@ -475,13 +484,13 @@ class Counter extends Plugin
         // build plugin tags
         $tags = array();
         foreach ($this->_plugin_tags as $key => $tag) {
-            $tags[$tag] = $this->_admin_lang->getLanguageValue('tag_' . $key);
+            $tags[$tag] = $this->admin_lang->getLanguageValue('tag_' . $key);
         }
 
         $info = array(
             '<b>' . self::PLUGIN_TITLE . '</b> ' . self::PLUGIN_VERSION,
             self::MOZILO_VERSION,
-            $this->_admin_lang->getLanguageValue(
+            $this->admin_lang->getLanguageValue(
                 'description',
                 htmlspecialchars($this->_plugin_tags['tag'])
             ),

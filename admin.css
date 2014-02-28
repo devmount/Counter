@@ -1,30 +1,114 @@
-.counter-admin-header {
-    margin: -0.4em -0.8em -5px -0.8em;
+.counter-admin-header,
+.counter-index-header {
+    position: relative;
+    width: 96%;
+    margin: 0 auto;
     padding: 10px;
     background-color: #234567;
     color: #fff;
     text-shadow: #000 0 1px 3px;
 }
-.counter-admin-header span {
+.counter-index-header {
+    margin: -0.4em -0.8em -5px -0.8em;
+    width: 100%;
+}
+.counter-admin-header span,
+.counter-index-header span {
     font-size:20px;
     vertical-align: top;
     padding-top: 3px;
     display: inline-block;
 }
-.counter-admin-subheader {
-    margin: -0.4em -0.8em 5px -0.8em;
+.counter-admin-subheader,
+.counter-index-subheader {
+    margin: -0.4em 0 5px -0.8em;
     padding: 5px 9px;
     background-color: #ddd;
     color: #111;
     text-shadow: #fff 0 1px 2px;
 }
+.counter-index-subheader {
+    margin: -0.4em -0.8em 5px -0.8em;
+}
 .counter-admin-li {
     background: #eee;
 }
-.counter-admin-li pre{
+.counter-index-li pre{
     white-space: normal;
 }
 .counter-admin-default {
     color: #aaa;
     padding-left: 6px;
+}
+.counter-admin-link {
+    text-decoration:none;
+}
+.counter-admin-link:hover {
+    color:#666;
+}
+.counter-ul {
+    width: 98%;
+    padding: 0;
+    margin: 0 auto;
+}
+.img-button {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: url(../plugins/Counter/img/icons.png);
+    cursor: pointer;
+}
+.icon-refresh {
+    margin: 7px 0 0 12px;
+    background-position: 0 0;
+}
+.icon-reset {
+    background-position: -16px 0;
+}
+.icon-delete {
+    background-position: -32px 0;
+}
+
+/* messages */
+.admin-msg .CounterError {
+    margin: 6px auto;
+}
+.CounterError {
+    display: table;
+    margin: 2px 0;
+    border: 1px solid #f44;
+    background-color: #fee;
+}
+.CounterError div {
+    display: table-cell;
+    padding: 2px 6px;
+    color: white;
+    background-color: #f44;
+    height: inherit;
+}
+.CounterError span {
+    display: table-cell;
+    padding: 2px 4px;
+    color: #f44;
+}
+.admin-msg .CounterSuccess {
+    margin: 6px auto;
+}
+.CounterSuccess {
+    display: table;
+    margin: 2px 0;
+    border: 1px solid #2a0;
+    background-color: #efe;
+}
+.CounterSuccess div {
+    display: table-cell;
+    padding: 2px 6px;
+    color: white;
+    background-color: #2a0;
+    height: inherit;
+}
+.CounterSuccess span {
+    display: table-cell;
+    padding: 2px 4px;
+    color: #2a0;
 }
