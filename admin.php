@@ -52,9 +52,22 @@ class CounterAdmin extends Counter
     private $_self_dir;
     // PLUGIN_SELF_URL from Counter
     private $_self_url;
+
     // file paths
     private $_fileips;
     private $_filedata;
+
+    // counter elements / flag
+    private $_elements = array(
+        'all',
+        'online',
+        'today',
+        'yesterday',
+        'maximum',
+        'maximumdate',
+        'average',
+        'total',
+    );
 
     /**
      * constructor
@@ -86,15 +99,23 @@ class CounterAdmin extends Counter
         $msg = '';
 
         // handle postresult
-        if (isset($postresult['reset_all'])) {
-            if ($postresult['reset_all']) {
-                $msg = $this->throwSuccess(
-                    $this->admin_lang->getLanguageValue('msg_success_reset_all')
-                );
-            } else {
-                $msg = $this->throwError(
-                    $this->admin_lang->getLanguageValue('msg_error_reset_all')
-                );
+        foreach ($this->_elements as $element) {
+            if (isset($postresult['reset_' . $element])) {
+                if ($postresult['reset_' . $element]) {
+                    $msg = $this->throwSuccess(
+                        $this->admin_lang->getLanguageValue(
+                            'msg_success_reset_element',
+                            $this->admin_lang->getLanguageValue('data_' . $element)
+                        )
+                    );
+                } else {
+                    $msg = $this->throwError(
+                        $this->admin_lang->getLanguageValue(
+                            'msg_error_reset_element',
+                            $this->admin_lang->getLanguageValue('data_' . $element)
+                        )
+                    );
+                }
             }
         }
 
@@ -112,10 +133,6 @@ class CounterAdmin extends Counter
                                 : '-',
             'average'     => $datalist['average'],
             'total'       => $datalist['total'],
-            'date'        => date(
-                $this->_settings->get('dateformat'),
-                strtotime($this->_settings->get('resetdate'))
-            ),
         );
 
         // read admin.css
@@ -183,7 +200,7 @@ class CounterAdmin extends Counter
                     . $this->admin_lang->getLanguageValue(
                         'confirm_reset',
                         $this->admin_lang->getLanguageValue(
-                            'confirm_whole_counter'
+                            'confirm_reset_all'
                         )
                     )
                     . '\'))
@@ -211,13 +228,57 @@ class CounterAdmin extends Counter
                     . $this->admin_lang->getLanguageValue('data_' . $label)
                     . '</td>
                     <td>' . $value . '</td>
-                    <td>reset</td>
+                    <td>
+                    <form
+                        id="reset_' . $label . '"
+                        action="' . URL_BASE . ADMIN_DIR_NAME . '/index.php"
+                        method="post"
+                    >
+                        <input type="hidden" name="pluginadmin"
+                            value="' . PLUGINADMIN . '"
+                        />
+                        <input type="hidden" name="action" value="' . ACTION . '" />
+                        <input type="hidden" name="reset_' . $label . '" value="1" />
+                    </form>
+                    <a
+                        class="img-button icon-reset"
+                        title="'
+                        . $this->admin_lang->getLanguageValue('icon_reset') . ' '
+                        . $this->admin_lang->getLanguageValue('data_' . $label)
+                        . '"
+                        onclick="if(confirm(\''
+                        . $this->admin_lang->getLanguageValue(
+                            'confirm_reset',
+                            $this->admin_lang->getLanguageValue(
+                                'data_' . $label
+                            )
+                        )
+                        . '\'))
+                        document.getElementById(\'reset_' . $label . '\')
+                            .submit()"
+                    ></a>
+                    </td>
                 </tr>
             ';
         }
-        $content .= '</table>
-                </li>
-            </ul>';
+        $content .= '
+                <tr>
+                    <td>'
+                    . $this->admin_lang->getLanguageValue('data_date')
+                    . '</td>
+                    <td>'
+                    . date(
+                        $this->_settings->get('dateformat'),
+                        strtotime($this->_settings->get('resetdate'))
+                    )
+                    . '</td>
+                    <td></td>
+                </tr>';
+
+        $content .= '
+            </table>
+            </li>
+        </ul>';
 
         return $content;
     }
@@ -229,38 +290,88 @@ class CounterAdmin extends Counter
      */
     function checkPost()
     {
-        // initialize return array
-        $success = array();
-
         // handle actions
-        $reset = getRequestValue('reset_all', "post", false);
-        if ($reset != '') {
-            $success['reset_all'] = $this->resetCounter();
+        foreach ($this->_elements as $element) {
+            $reset = getRequestValue('reset_' . $element, "post", false);
+            if ($reset != '') {
+                return array('reset_' . $element => $this->resetCounter($element));
+            }
         }
 
-        return $success;
+        return array();
     }
 
     /**
      * resets data from counter
      *
+     * @param string $flag counterelement to reset
+     *
      * @return boolean success
      */
-    protected function resetCounter()
+    protected function resetCounter($flag)
     {
-        return
-            CounterDatabase::saveArray(
-                $this->_filedata,
-                array(
-                    'date' => 0,
-                    'today' => 0,
-                    'yesterday' => 0,
-                    'total' => 0,
-                    'max' => 0,
-                    'maxdate' => 0,
-                    'average' => '-',
-                )
-            ) and CounterDatabase::saveArray($this->_fileips, array());
+        switch ($flag) {
+        case 'all':
+            return
+                CounterDatabase::saveArray(
+                    $this->_filedata,
+                    array(
+                        'date' => 0,
+                        'today' => 0,
+                        'yesterday' => 0,
+                        'total' => 0,
+                        'max' => 0,
+                        'maxdate' => 0,
+                        'average' => '-',
+                    )
+                ) and CounterDatabase::saveArray($this->_fileips, array());
+            break;
+
+        case 'online':
+            return CounterDatabase::saveArray($this->_fileips, array());
+            break;
+
+        case 'today':
+            $datalist = CounterDatabase::loadArray($this->_filedata);
+            $datalist['today'] = 0;
+            return CounterDatabase::saveArray($this->_filedata, $datalist);
+            break;
+
+        case 'yesterday':
+            $datalist = CounterDatabase::loadArray($this->_filedata);
+            $datalist['yesterday'] = 0;
+            return CounterDatabase::saveArray($this->_filedata, $datalist);
+            break;
+
+        case 'maximum':
+            $datalist = CounterDatabase::loadArray($this->_filedata);
+            $datalist['max'] = 0;
+            return CounterDatabase::saveArray($this->_filedata, $datalist);
+            break;
+
+        case 'maximumdate':
+            $datalist = CounterDatabase::loadArray($this->_filedata);
+            $datalist['maxdate'] = 0;
+            return CounterDatabase::saveArray($this->_filedata, $datalist);
+            break;
+
+        case 'average':
+            $datalist = CounterDatabase::loadArray($this->_filedata);
+            $datalist['average'] = '-';
+            return CounterDatabase::saveArray($this->_filedata, $datalist);
+            break;
+
+        case 'total':
+            $datalist = CounterDatabase::loadArray($this->_filedata);
+            $datalist['total'] = 0;
+            return CounterDatabase::saveArray($this->_filedata, $datalist);
+            break;
+
+        default:
+            return false;
+            break;
+        }
+        return false;
     }
 }
 
