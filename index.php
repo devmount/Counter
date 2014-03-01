@@ -11,7 +11,7 @@
  * @package  PHP_MoziloPlugins
  * @author   HPdesigner <kontakt@devmount.de>
  * @license  GPL v3
- * @version  GIT: v1.2.2014-02-27
+ * @version  GIT: v1.3.2014-03-01
  * @link     https://github.com/devmount/Counter
  * @link     http://devmount.de/Develop/Mozilo%20Plugins/Counter.html
  * @see      Now faith is being sure of what we hope for
@@ -51,7 +51,7 @@ class Counter extends Plugin
     const PLUGIN_DOCU
         = 'http://devmount.de/Develop/Mozilo%20Plugins/Counter.html';
     const PLUGIN_TITLE   = 'Counter';
-    const PLUGIN_VERSION = 'v1.2.2014-02-27';
+    const PLUGIN_VERSION = 'v1.3.2014-03-01';
     const MOZILO_VERSION = '2.0';
     private $_plugin_tags = array(
         'tag'      => '{Counter}',
