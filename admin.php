@@ -97,6 +97,10 @@ class CounterAdmin extends Counter
         $filedata = $this->_self_dir . 'data/data.conf.php';
         $datalist = CounterDatabase::loadArray($filedata);
 
+        // get current ip data
+        $fileips = $this->_self_dir . 'data/ips.conf.php';
+        $online  = count(CounterDatabase::loadArray($fileips));
+
         // read admin.css
         $admin_css = '';
         $lines = file('../plugins/Counter/admin.css');
@@ -136,19 +140,71 @@ class CounterAdmin extends Counter
         if ($msg != '') {
             $content .= '<div class="admin-msg">' . $msg . '</div>';
         }
-print_r($this->_settings);
         $content .= '
         <ul class="counter-ul">
             <li class="mo-in-ul-li ui-widget-content counter-admin-li">
                 <div class="counter-admin-subheader">'
-                . $datalist['today'] . '<br />'
-                . $datalist['yesterday'] . '<br />'
-                . $datalist['max'] . '<br />'
-                . date($this->_settings->get('dateformat'), $datalist['maxdate']) . '<br />'
-                . '$average' . '<br />'
-                . $datalist['total'] . '<br />'
-                . date($this->_settings->get('dateformat'), strtotime($this->_settings->get('resetdate'))) . '<br />'
-                . '</div>';
+                . $this->admin_lang->getLanguageValue('admin_current_counter')
+                . '</div>
+                <table>
+                    <tr>
+                        <td>'
+                        . $this->admin_lang->getLanguageValue('data_online')
+                        . '</td>
+                        <td>' . $online . '</td>
+                    </tr>
+                    <tr>
+                        <td>'
+                        . $this->admin_lang->getLanguageValue('data_today')
+                        . '</td>
+                        <td>' . $datalist['today'] . '</td>
+                    </tr>
+                    <tr>
+                        <td>'
+                        . $this->admin_lang->getLanguageValue('data_yesterday')
+                        . '</td>
+                        <td>' . $datalist['yesterday'] . '</td>
+                    </tr>
+                    <tr>
+                        <td>'
+                        . $this->admin_lang->getLanguageValue('data_maximum')
+                        . '</td>
+                        <td>' . $datalist['max'] . '</td>
+                    </tr>
+                    <tr>
+                        <td>'
+                        . $this->admin_lang->getLanguageValue('data_maximumdate')
+                        . '</td>
+                        <td>'
+                        . date(
+                            $this->_settings->get('dateformat'),
+                            $datalist['maxdate']
+                        )
+                    . '</td>
+                    </tr>
+                    <tr>
+                        <td>'
+                        . $this->admin_lang->getLanguageValue('data_average')
+                        . '</td>
+                        <td>' . $datalist['average'] . '</td>
+                    </tr>
+                    <tr>
+                        <td>'
+                        . $this->admin_lang->getLanguageValue('data_total')
+                        . '</td>
+                        <td>' . $datalist['total'] . '</td>
+                    </tr>
+                    <tr>
+                        <td>'
+                        . $this->admin_lang->getLanguageValue('data_date')
+                        . '</td>
+                        <td>'
+                        . date(
+                            $this->_settings->get('dateformat'),
+                            strtotime($this->_settings->get('resetdate'))
+                        )
+                    . '</td></tr>
+                </table>';
 
         $content .= '</li></ul>';
 

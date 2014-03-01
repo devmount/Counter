@@ -157,7 +157,6 @@ class Counter extends Plugin
         $setdate   = false;
         $locked_ip = false;
         $max       = 1;
-        $average   = 0;
 
         // initialize counter database
         if (empty($datalist)) {
@@ -168,6 +167,7 @@ class Counter extends Plugin
                 'total' => 0,
                 'max' => 0,
                 'maxdate' => 0,
+                'average' => '-',
             );
             CounterDatabase::saveArray($filedata, $datalist);
         }
@@ -218,6 +218,18 @@ class Counter extends Plugin
             $datalist['maxdate'] = $time;
         }
 
+        // evaluate average
+        $dayspan = bcdiv(
+            (strtotime($date) - strtotime($conf['resetdate'])), 86400, 0
+        ) - 1;
+        if ($dayspan > 0) {
+            $datalist['average']
+                = round((($datalist['total'] - $datalist['today'])/$dayspan), 1);
+        } else {
+            // too less data for average
+            $datalist['average'] = '-';
+        }
+
         // write current values to database
         CounterDatabase::saveArray($filedata, $datalist);
 
@@ -229,18 +241,6 @@ class Counter extends Plugin
             }
         }
         CounterDatabase::saveArray($fileips, $iplist);
-
-        // evaluate average
-        $dayspan = bcdiv(
-            (strtotime($date) - strtotime($conf['resetdate'])), 86400, 0
-        ) - 1;
-        if ($dayspan > 0) {
-            $average
-                = round((($datalist['total'] - $datalist['today'])/$dayspan), 1);
-        } else {
-            // too less data for average
-            $average = '-';
-        }
 
         // get online count
         $online = count($iplist);
@@ -257,7 +257,7 @@ class Counter extends Plugin
                 $datalist['yesterday'],
                 $datalist['max'],
                 date($conf['dateformat'], $datalist['maxdate']),
-                $average,
+                $datalist['average'],
                 $datalist['total'],
                 date($conf['dateformat'], strtotime($conf['resetdate'])),
             ),
