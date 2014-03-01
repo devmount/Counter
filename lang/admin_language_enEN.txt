@@ -29,6 +29,7 @@ data_label                = Label
 data_value                = value
 data_action               = Action
 data_ips                  = Online IP addresses
+data_no_ips               = Currently no visitors are online.
 data_online               = Online
 data_today                = Today
 data_yesterday            = Yesterday

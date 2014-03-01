@@ -287,12 +287,20 @@ class CounterAdmin extends Counter
                     . '</th>
                     <th></th>
                 </tr>';
-        foreach ($iplist as $ip => $tstamp) {
-            $content .= '
-                    <tr>
-                        <td>' . date('d.m.Y, H:i:s', $tstamp) . '</td>
-                        <td>' . $ip . '</td>
-                    </tr>';
+        if (count($iplist) > 0) {
+            foreach ($iplist as $ip => $tstamp) {
+                $content .= '
+                        <tr>
+                            <td>' . date('d.m.Y, H:i:s', $tstamp) . '</td>
+                            <td>' . $ip . '</td>
+                        </tr>';
+            }
+        } else {
+            $content .= '<tr>
+                            <td colspan="2">'
+                            . $this->admin_lang->getLanguageValue('data_no_ips')
+                            . '</td>
+                        </tr>';
         }
         $content .= '
             </table>
