@@ -284,7 +284,7 @@ class CounterAdmin extends Counter
                     'maxdate' => 0,
                     'average' => '-',
                 )
-            );
+            ) and CounterDatabase::saveArray($this->_fileips, array());
     }
 }
 
