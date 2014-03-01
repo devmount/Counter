@@ -119,6 +119,10 @@ class Counter extends Plugin
         ),
     );
 
+    // initialize file paths
+    private $_fileips;
+    private $_filedata;
+
     /**
      * creates plugin content
      *
@@ -145,15 +149,17 @@ class Counter extends Plugin
                 : $this->settings->get($elem);
         }
 
+        // initialize file paths
+        $this->_fileips  = $this->PLUGIN_SELF_DIR . 'data/ips.conf.php';
+        $this->_filedata = $this->PLUGIN_SELF_DIR . 'data/data.conf.php';
+
         // initialize basic values
         $online    = 0;
         $time      = time();
         $date      = date('d.m.y');
         $ip        = getenv(REMOTE_ADDR);
-        $fileips   = $this->PLUGIN_SELF_DIR . 'data/ips.conf.php';
-        $filedata  = $this->PLUGIN_SELF_DIR . 'data/data.conf.php';
-        $iplist    = CounterDatabase::loadArray($fileips);
-        $datalist  = CounterDatabase::loadArray($filedata);
+        $iplist    = CounterDatabase::loadArray($this->_fileips);
+        $datalist  = CounterDatabase::loadArray($this->_filedata);
         $setdate   = false;
         $locked_ip = false;
         $max       = 1;
@@ -169,19 +175,19 @@ class Counter extends Plugin
                 'maxdate' => 0,
                 'average' => '-',
             );
-            CounterDatabase::saveArray($filedata, $datalist);
+            CounterDatabase::saveArray($this->_filedata, $datalist);
         }
         // initialize ip database
         if (empty($iplist)) {
             $iplist = array(
                 $ip => $time,
             );
-            CounterDatabase::saveArray($fileips, $iplist);
+            CounterDatabase::saveArray($this->_fileips, $iplist);
         } else {
             // ip does not exist yet: append it
             if (!array_key_exists($ip, $iplist)) {
                 $iplist[$ip] = $time;
-                CounterDatabase::saveArray($fileips, $iplist);
+                CounterDatabase::saveArray($this->_fileips, $iplist);
             } else {
                 // ip is locked, when still in reload time
                 if ($iplist[$ip] > $time - $conf['reload']) {
@@ -189,7 +195,7 @@ class Counter extends Plugin
                 } else {
                     // otherwise its time will be updated
                     $iplist[$ip] = $time;
-                    CounterDatabase::saveArray($fileips, $iplist);
+                    CounterDatabase::saveArray($this->_fileips, $iplist);
                 }
             }
         }
@@ -231,7 +237,7 @@ class Counter extends Plugin
         }
 
         // write current values to database
-        CounterDatabase::saveArray($filedata, $datalist);
+        CounterDatabase::saveArray($this->_filedata, $datalist);
 
         // if ip not online anymore, delete ip
         // print_r($iplist);
@@ -240,7 +246,7 @@ class Counter extends Plugin
                 unset($iplist[$ipdata]);
             }
         }
-        CounterDatabase::saveArray($fileips, $iplist);
+        CounterDatabase::saveArray($this->_fileips, $iplist);
 
         // get online count
         $online = count($iplist);
@@ -579,6 +585,38 @@ class Counter extends Plugin
         }
         return $conftext;
     }
+
+
+    /**
+     * throws styled error message
+     *
+     * @param string $text Content of error message
+     *
+     * @return string HTML content
+     */
+    protected function throwError($text)
+    {
+        return '<div class="' . self::PLUGIN_TITLE . 'Error">'
+            . '<div>' . $this->admin_lang->getLanguageValue('error') . '</div>'
+            . '<span>' . $text. '</span>'
+            . '</div>';
+    }
+
+    /**
+     * throws styled success message
+     *
+     * @param string $text Content of success message
+     *
+     * @return string HTML content
+     */
+    protected function throwSuccess($text)
+    {
+        return '<div class="' . self::PLUGIN_TITLE . 'Success">'
+            . '<div>' . $this->admin_lang->getLanguageValue('success') . '</div>'
+            . '<span>' . $text. '</span>'
+            . '</div>';
+    }
+
 }
 
 ?>
