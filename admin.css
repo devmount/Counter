@@ -30,13 +30,15 @@
 .counter-index-subheader {
     margin: -0.4em -0.8em 5px -0.8em;
 }
-.counter-admin-li {
+.counter-admin-li,
+.counter-index-li {
     background: #eee;
 }
 .counter-index-li pre{
     white-space: normal;
 }
-.counter-admin-default {
+.counter-admin-default,
+.counter-index-default {
     color: #aaa;
     padding-left: 6px;
 }
@@ -57,12 +59,14 @@
     height: 16px;
     background: url(../plugins/Counter/img/icons.png);
     cursor: pointer;
+    vertical-align: middle;
 }
 .icon-refresh {
     margin: 7px 0 0 12px;
     background-position: 0 0;
 }
 .icon-reset {
+    margin: 0 0 0 8px;
     background-position: -16px 0;
 }
 .icon-delete {
@@ -111,4 +115,31 @@
     display: table-cell;
     padding: 2px 4px;
     color: #2a0;
+}
+
+/* table */
+.counter-admin-li table {
+}
+.counter-admin-li table tr:nth-child(even) {
+    background: #e2e2e2;
+}
+.counter-admin-li table tr:hover td {
+    background: #fff;
+}
+.counter-admin-li table tr th {
+    padding: 4px 8px;
+    background-color: #234567;
+    color: #fff;
+    text-shadow: #000 0 1px 3px;
+}
+.counter-admin-li table tr td {
+    padding: 4px 8px;
+    vertical-align: middle;
+}
+.counter-admin-li table tr td:first-child {
+
+}
+.counter-admin-li table tr td:nth-child(2) {
+    color: #234567;
+    font-size: 16pt;
 }
