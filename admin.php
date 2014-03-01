@@ -52,6 +52,9 @@ class CounterAdmin extends Counter
     private $_self_dir;
     // PLUGIN_SELF_URL from Counter
     private $_self_url;
+    // file paths
+    private $_fileips;
+    private $_filedata;
 
     /**
      * constructor
@@ -61,9 +64,11 @@ class CounterAdmin extends Counter
     function CounterAdmin($plugin)
     {
         $this->admin_lang = $plugin->admin_lang;
-        $this->_settings = $plugin->settings;
-        $this->_self_dir = $plugin->PLUGIN_SELF_DIR;
-        $this->_self_url = $plugin->PLUGIN_SELF_URL;
+        $this->_settings  = $plugin->settings;
+        $this->_self_dir  = $plugin->PLUGIN_SELF_DIR;
+        $this->_self_url  = $plugin->PLUGIN_SELF_URL;
+        $this->_fileips   = $plugin->PLUGIN_SELF_DIR . 'data/ips.conf.php';
+        $this->_filedata  = $plugin->PLUGIN_SELF_DIR . 'data/data.conf.php';
     }
 
     /**
@@ -81,25 +86,23 @@ class CounterAdmin extends Counter
         $msg = '';
 
         // handle postresult
-        if (isset($postresult['reset'])) {
-            if ($postresult['reset']) {
+        if (isset($postresult['reset_all'])) {
+            if ($postresult['reset_all']) {
                 $msg = $this->throwSuccess(
-                    $this->admin_lang->getLanguageValue('msg_success_reset')
+                    $this->admin_lang->getLanguageValue('msg_success_reset_all')
                 );
             } else {
                 $msg = $this->throwError(
-                    $this->admin_lang->getLanguageValue('msg_error_reset')
+                    $this->admin_lang->getLanguageValue('msg_error_reset_all')
                 );
             }
         }
 
         // get current counter data
-        $filedata = $this->_self_dir . 'data/data.conf.php';
-        $datalist = CounterDatabase::loadArray($filedata);
+        $datalist = CounterDatabase::loadArray($this->_filedata);
 
         // get current ip data
-        $fileips = $this->_self_dir . 'data/ips.conf.php';
-        $online  = count(CounterDatabase::loadArray($fileips));
+        $online  = count(CounterDatabase::loadArray($this->_fileips));
 
         // read admin.css
         $admin_css = '';
@@ -145,8 +148,41 @@ class CounterAdmin extends Counter
             <li class="mo-in-ul-li ui-widget-content counter-admin-li">
                 <div class="counter-admin-subheader">'
                 . $this->admin_lang->getLanguageValue('admin_current_counter')
-                . '</div>
-                <table>
+                . '
+                <form
+                    id="reset_all"
+                    action="' . URL_BASE . ADMIN_DIR_NAME . '/index.php"
+                    method="post"
+                >
+                    <input type="hidden" name="pluginadmin"
+                        value="' . PLUGINADMIN . '"
+                    />
+                    <input type="hidden" name="action" value="' . ACTION . '" />
+                    <input type="hidden" name="reset_all" value="1" />
+                </form>
+                <a
+                    class="img-button icon-reset"
+                    title="'
+                    . $this->admin_lang->getLanguageValue('icon_reset')
+                    . '"
+                    onclick="if(confirm(\''
+                    . $this->admin_lang->getLanguageValue(
+                        'confirm_reset',
+                        $this->admin_lang->getLanguageValue(
+                            'confirm_whole_counter'
+                        )
+                    )
+                    . '\'))
+                    document.getElementById(\'reset_all\')
+                        .submit()"
+                ></a>
+
+                </div>
+                <table cellspacing="0">
+                    <tr>
+                        <th>Label</th>
+                        <th>Wert</th>
+                    </tr>
                     <tr>
                         <td>'
                         . $this->admin_lang->getLanguageValue('data_online')
@@ -175,12 +211,11 @@ class CounterAdmin extends Counter
                         <td>'
                         . $this->admin_lang->getLanguageValue('data_maximumdate')
                         . '</td>
-                        <td>'
-                        . date(
-                            $this->_settings->get('dateformat'),
-                            $datalist['maxdate']
-                        )
-                    . '</td>
+                        <td>';
+                        $content .= ($datalist['maxdate'] != 0)
+                            ? date('d.m.Y, H:i:s', $datalist['maxdate'])
+                            : '-';
+                        $content .= '</td>
                     </tr>
                     <tr>
                         <td>'
@@ -222,9 +257,9 @@ class CounterAdmin extends Counter
         $success = array();
 
         // handle actions
-        $reset = getRequestValue('r', "post", false);
+        $reset = getRequestValue('reset_all', "post", false);
         if ($reset != '') {
-            $success['reset'] = $this->resetCounter();
+            $success['reset_all'] = $this->resetCounter();
         }
 
         return $success;
@@ -237,10 +272,19 @@ class CounterAdmin extends Counter
      */
     protected function resetCounter()
     {
-        return Database::saveArray(
-            $this->_self_dir . 'data/' . $catfile . '.php',
-            '0'
-        );
+        return
+            CounterDatabase::saveArray(
+                $this->_filedata,
+                array(
+                    'date' => 0,
+                    'today' => 0,
+                    'yesterday' => 0,
+                    'total' => 0,
+                    'max' => 0,
+                    'maxdate' => 0,
+                    'average' => '-',
+                )
+            );
     }
 }
 
