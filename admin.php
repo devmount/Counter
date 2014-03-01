@@ -122,9 +122,12 @@ class CounterAdmin extends Counter
         // get current counter data
         $datalist = CounterDatabase::loadArray($this->_filedata);
 
+        // get current ip data
+        $iplist = CounterDatabase::loadArray($this->_fileips);
+
         // build table data
         $table_rows = array(
-            'online'      => count(CounterDatabase::loadArray($this->_fileips)),
+            'online'      => count($iplist),
             'today'       => $datalist['today'],
             'yesterday'   => $datalist['yesterday'],
             'maximum'     => $datalist['max'],
@@ -209,7 +212,7 @@ class CounterAdmin extends Counter
                 ></a>
 
             </div>
-            <table cellspacing="0">
+            <table class="data" cellspacing="0">
                 <tr>
                     <th>'
                         . $this->admin_lang->getLanguageValue('data_label')
@@ -273,10 +276,27 @@ class CounterAdmin extends Counter
                     )
                     . '</td>
                     <td></td>
-                </tr>';
+                </tr>
+            </table>';
 
         $content .= '
+            <table class="ip" cellspacing="0">
+                <tr>
+                    <th>'
+                    . $this->admin_lang->getLanguageValue('data_ips')
+                    . '</th>
+                    <th></th>
+                </tr>';
+        foreach ($iplist as $ip => $tstamp) {
+            $content .= '
+                    <tr>
+                        <td>' . date('d.m.Y, H:i:s', $tstamp) . '</td>
+                        <td>' . $ip . '</td>
+                    </tr>';
+        }
+        $content .= '
             </table>
+            <br style="clear: both;" />
             </li>
         </ul>';
 

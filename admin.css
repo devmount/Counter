@@ -119,6 +119,7 @@
 
 /* table */
 .counter-admin-li table {
+    width: 49%;
 }
 .counter-admin-li table tr:nth-child(even) {
     background: #e2e2e2;
@@ -136,10 +137,13 @@
     padding: 4px 8px;
     vertical-align: middle;
 }
-.counter-admin-li table tr td:first-child {
-
-}
 .counter-admin-li table tr td:nth-child(2) {
     color: #234567;
     font-size: 16pt;
+}
+.counter-admin-li table.data {
+    float: left;
+}
+.counter-admin-li table.ip {
+    float: right;
 }

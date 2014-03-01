@@ -28,6 +28,7 @@ msg_error_reset_element   = Es gab einen Fehler beim Zurücksetzen von {PARAM1}.
 data_label                = Label
 data_value                = Wert
 data_action               = Aktion
+data_ips                  = Online IP Adressen
 data_online               = Online
 data_today                = Heute
 data_yesterday            = Gestern
