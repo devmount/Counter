@@ -1,0 +1,25 @@
+/*
+    Counter CSS styles
+*/
+
+.Counter {
+}
+
+.CounterError {
+    display: table;
+    margin: 2px 0;
+    border: 1px solid #f33;
+    background-color: #fee;
+}
+.CounterError div {
+    display: table-cell;
+    padding: 2px 6px;
+    color: white;
+    background-color: #f33;
+    height: inherit;
+}
+.CounterError span {
+    display: table-cell;
+    padding: 2px 4px;
+    color: #f33;
+}

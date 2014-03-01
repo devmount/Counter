@@ -54,7 +54,7 @@ class Counter extends Plugin
     const PLUGIN_VERSION = 'v1.3.2014-03-01';
     const MOZILO_VERSION = '2.0';
     private $_plugin_tags = array(
-        'tag'      => '{Counter}',
+        'tag' => '{Counter}',
     );
     private $_template_elements = array(
         '#ONLINE#',
