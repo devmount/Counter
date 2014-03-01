@@ -101,8 +101,22 @@ class CounterAdmin extends Counter
         // get current counter data
         $datalist = CounterDatabase::loadArray($this->_filedata);
 
-        // get current ip data
-        $online  = count(CounterDatabase::loadArray($this->_fileips));
+        // build table data
+        $table_rows = array(
+            'online'      => count(CounterDatabase::loadArray($this->_fileips)),
+            'today'       => $datalist['today'],
+            'yesterday'   => $datalist['yesterday'],
+            'maximum'     => $datalist['max'],
+            'maximumdate' => ($datalist['maxdate'] != 0)
+                                ? date('d.m.Y, H:i:s', $datalist['maxdate'])
+                                : '-',
+            'average'     => $datalist['average'],
+            'total'       => $datalist['total'],
+            'date'        => date(
+                $this->_settings->get('dateformat'),
+                strtotime($this->_settings->get('resetdate'))
+            ),
+        );
 
         // read admin.css
         $admin_css = '';
@@ -146,7 +160,7 @@ class CounterAdmin extends Counter
         $content .= '
         <ul class="counter-ul">
             <li class="mo-in-ul-li ui-widget-content counter-admin-li">
-                <div class="counter-admin-subheader">'
+            <div class="counter-admin-subheader">'
                 . $this->admin_lang->getLanguageValue('admin_current_counter')
                 . '
                 <form
@@ -177,71 +191,33 @@ class CounterAdmin extends Counter
                         .submit()"
                 ></a>
 
-                </div>
-                <table cellspacing="0">
-                    <tr>
-                        <th>Label</th>
-                        <th>Wert</th>
-                    </tr>
-                    <tr>
-                        <td>'
-                        . $this->admin_lang->getLanguageValue('data_online')
-                        . '</td>
-                        <td>' . $online . '</td>
-                    </tr>
-                    <tr>
-                        <td>'
-                        . $this->admin_lang->getLanguageValue('data_today')
-                        . '</td>
-                        <td>' . $datalist['today'] . '</td>
-                    </tr>
-                    <tr>
-                        <td>'
-                        . $this->admin_lang->getLanguageValue('data_yesterday')
-                        . '</td>
-                        <td>' . $datalist['yesterday'] . '</td>
-                    </tr>
-                    <tr>
-                        <td>'
-                        . $this->admin_lang->getLanguageValue('data_maximum')
-                        . '</td>
-                        <td>' . $datalist['max'] . '</td>
-                    </tr>
-                    <tr>
-                        <td>'
-                        . $this->admin_lang->getLanguageValue('data_maximumdate')
-                        . '</td>
-                        <td>';
-                        $content .= ($datalist['maxdate'] != 0)
-                            ? date('d.m.Y, H:i:s', $datalist['maxdate'])
-                            : '-';
-                        $content .= '</td>
-                    </tr>
-                    <tr>
-                        <td>'
-                        . $this->admin_lang->getLanguageValue('data_average')
-                        . '</td>
-                        <td>' . $datalist['average'] . '</td>
-                    </tr>
-                    <tr>
-                        <td>'
-                        . $this->admin_lang->getLanguageValue('data_total')
-                        . '</td>
-                        <td>' . $datalist['total'] . '</td>
-                    </tr>
-                    <tr>
-                        <td>'
-                        . $this->admin_lang->getLanguageValue('data_date')
-                        . '</td>
-                        <td>'
-                        . date(
-                            $this->_settings->get('dateformat'),
-                            strtotime($this->_settings->get('resetdate'))
-                        )
-                    . '</td></tr>
-                </table>';
-
-        $content .= '</li></ul>';
+            </div>
+            <table cellspacing="0">
+                <tr>
+                    <th>'
+                        . $this->admin_lang->getLanguageValue('data_label')
+                    . '</th>
+                    <th>'
+                        . $this->admin_lang->getLanguageValue('data_value')
+                    . '</th>
+                    <th>'
+                        . $this->admin_lang->getLanguageValue('data_action')
+                    . '</th>
+                </tr>';
+        foreach ($table_rows as $label => $value) {
+            $content .= '
+                <tr>
+                    <td>'
+                    . $this->admin_lang->getLanguageValue('data_' . $label)
+                    . '</td>
+                    <td>' . $value . '</td>
+                    <td>reset</td>
+                </tr>
+            ';
+        }
+        $content .= '</table>
+                </li>
+            </ul>';
 
         return $content;
     }

@@ -26,6 +26,7 @@ msg_error_reset_all     = An error occured while resetting counter.
 data_label              = Label
 data_value              = value
 data_online             = Online
+data_action             = Action
 data_today              = Today
 data_yesterday          = Yesterday
 data_maximum            = Maximum
