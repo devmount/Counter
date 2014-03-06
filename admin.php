@@ -287,6 +287,8 @@ class CounterAdmin extends Counter
                     . '</th>
                     <th></th>
                 </tr>';
+
+        // check ip list
         if (count($iplist) > 0) {
             foreach ($iplist as $ip => $tstamp) {
                 $content .= '
@@ -302,6 +304,7 @@ class CounterAdmin extends Counter
                             . '</td>
                         </tr>';
         }
+
         $content .= '
             </table>
             <br style="clear: both;" />
