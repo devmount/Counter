@@ -49,7 +49,7 @@ class Counter extends Plugin
     // plugin information
     const PLUGIN_AUTHOR  = 'HPdesigner';
     const PLUGIN_DOCU
-        = 'http://devmount.de/Develop/Mozilo%20Plugins/Counter.html';
+        = 'http://devmount.de/Develop/moziloCMS/Plugins/Counter.html';
     const PLUGIN_TITLE   = 'Counter';
     const PLUGIN_VERSION = 'v1.3.2014-03-01';
     const MOZILO_VERSION = '2.0';
