@@ -10,8 +10,8 @@
  *
  * @category PHP
  * @package  PHP_MoziloPlugins
- * @author   HPdesigner <kontakt@devmount.de>
- * @license  GPL v3
+ * @author   HPdesigner <mail@devmount.de>
+ * @license  GPL v3+
  * @link     https://github.com/devmount/Counter
  *
  * Plugin created by DEVMOUNT
@@ -38,8 +38,8 @@ return $CounterAdmin->getContentAdmin($postresult);
  *
  * @category PHP
  * @package  PHP_MoziloPlugins
- * @author   HPdesigner <kontakt@devmount.de>
- * @license  GPL v3
+ * @author   HPdesigner <mail@devmount.de>
+ * @license  GPL v3+
  * @link     https://github.com/devmount/Counter
  */
 class CounterAdmin extends Counter

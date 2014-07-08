@@ -10,10 +10,10 @@
  * @category PHP
  * @package  PHP_MoziloPlugins
  * @author   HPdesigner <kontakt@devmount.de>
- * @license  GPL v3
+ * @license  GPL v3+
  * @version  GIT: v1.3.2014-03-01
  * @link     https://github.com/devmount/Counter
- * @link     http://devmount.de/Develop/Mozilo%20Plugins/Counter.html
+ * @link     http://devmount.de/Develop/moziloCMS/Plugins/Counter.html
  * @see      Now faith is being sure of what we hope for
  *           and certain of what we do not see.
  *            — The Bible
@@ -37,7 +37,7 @@ require_once "database.php";
  * @category PHP
  * @package  PHP_MoziloPlugins
  * @author   HPdesigner <kontakt@devmount.de>
- * @license  GPL v3
+ * @license  GPL v3+
  * @link     https://github.com/devmount/Counter
  */
 class Counter extends Plugin
