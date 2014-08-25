@@ -1,5 +1,5 @@
 Counter
-===========
+=======
 
 A Plugin for moziloCMS 2.0
 

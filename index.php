@@ -9,13 +9,13 @@
  *
  * @category PHP
  * @package  PHP_MoziloPlugins
- * @author   HPdesigner <kontakt@devmount.de>
+ * @author   DEVMOUNT <mail@devmount.de>
  * @license  GPL v3+
  * @version  GIT: v1.3.2014-03-01
  * @link     https://github.com/devmount/Counter
  * @link     http://devmount.de/Develop/moziloCMS/Plugins/Counter.html
- * @see      Now faith is being sure of what we hope for
- *           and certain of what we do not see.
+ * @see      Now faith is being sure of what we hope for and certain of what we do
+ *           not see.
  *            — The Bible
  *
  * Plugin created by DEVMOUNT
@@ -36,7 +36,7 @@ require_once "database.php";
  *
  * @category PHP
  * @package  PHP_MoziloPlugins
- * @author   HPdesigner <kontakt@devmount.de>
+ * @author   DEVMOUNT <mail@devmount.de>
  * @license  GPL v3+
  * @link     https://github.com/devmount/Counter
  */
@@ -47,12 +47,13 @@ class Counter extends Plugin
     private $_cms_lang;
 
     // plugin information
-    const PLUGIN_AUTHOR  = 'HPdesigner';
-    const PLUGIN_DOCU
-        = 'http://devmount.de/Develop/moziloCMS/Plugins/Counter.html';
+    const PLUGIN_AUTHOR  = 'DEVMOUNT';
     const PLUGIN_TITLE   = 'Counter';
     const PLUGIN_VERSION = 'v1.3.2014-03-01';
     const MOZILO_VERSION = '2.0';
+    const PLUGIN_DOCU
+        = 'http://devmount.de/Develop/moziloCMS/Plugins/Counter.html';
+
     private $_plugin_tags = array(
         'tag' => '{Counter}',
     );
@@ -501,7 +502,11 @@ class Counter extends Plugin
                 htmlspecialchars($this->_plugin_tags['tag'])
             ),
             self::PLUGIN_AUTHOR,
-            self::PLUGIN_DOCU,
+            array(
+                self::PLUGIN_DOCU,
+                self::PLUGIN_TITLE . ' '
+                . $this->admin_lang->getLanguageValue('on_devmount')
+            ),
             $tags
         );
 

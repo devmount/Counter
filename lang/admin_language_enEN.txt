@@ -1,5 +1,6 @@
 tag                       = Inserts the Counter
 description               = Counts the visitors. <br /><br /><span style='font-weight:bold'>Use:</span><br /><span style='font-family:monospace;margin:3px 3px; background-color:#eee;border:1px dotted #aaa;'>{PARAM1}</span> Returns the Counter and certain counter elements, depending on configuration.<br /><br /><span style='font-weight:bold'>Documentation:</span><br />A detailed documentation can be found on <span style="font-style:italic;">www.devmount.de </span> (link above).
+on_devmount               = on devmount.de
 config_resetdate          = Reset date (e.g. like: YYYY-MM-DD)
 config_dateformat         = Date format
 config_mintime            = Stying time (in seconds)
