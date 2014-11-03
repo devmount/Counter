@@ -226,8 +226,8 @@ class Counter extends Plugin
         }
 
         // evaluate average
-        $dayspan = bcdiv(
-            (strtotime($date) - strtotime($conf['resetdate'])), 86400, 0
+        $dayspan = round(
+            (strtotime($date) - strtotime($conf['resetdate']))/86400, 0
         ) - 1;
         if ($dayspan > 0) {
             $datalist['average']
