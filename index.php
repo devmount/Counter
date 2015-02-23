@@ -499,7 +499,7 @@ class Counter extends Plugin
             self::MOZILO_VERSION,
             $this->admin_lang->getLanguageValue(
                 'description',
-                htmlspecialchars($this->_plugin_tags['tag'])
+                htmlspecialchars($this->_plugin_tags['tag'], ENT_COMPAT, 'UTF-8')
             ),
             self::PLUGIN_AUTHOR,
             array(
