@@ -158,7 +158,7 @@ class Counter extends Plugin
         $online    = 0;
         $time      = time();
         $date      = date('d.m.y');
-        $ip        = getenv(REMOTE_ADDR);
+        $ip        = getenv('REMOTE_ADDR');
         $iplist    = CounterDatabase::loadArray($this->_fileips);
         $datalist  = CounterDatabase::loadArray($this->_filedata);
         $setdate   = false;
