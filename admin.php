@@ -24,15 +24,6 @@ if (!defined('IS_ADMIN') or !IS_ADMIN) {
     die();
 }
 
-// instantiate CounterAdmin class
-$CounterAdmin = new CounterAdmin($plugin);
-
-// handle post input
-$postresult = $CounterAdmin->checkPost();
-
-// return admin content
-return $CounterAdmin->getContentAdmin($postresult);
-
 /**
  * CounterAdmin Class
  *
@@ -405,5 +396,15 @@ class CounterAdmin extends Counter
         return false;
     }
 }
+
+// instantiate CounterAdmin class
+$CounterAdmin = new CounterAdmin($plugin);
+
+// handle post input
+$postresult = $CounterAdmin->checkPost();
+
+// return admin content
+return $CounterAdmin->getContentAdmin($postresult);
+
 
 ?>
