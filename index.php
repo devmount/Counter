@@ -12,7 +12,7 @@
  * @author   DEVMOUNT <mail@devmount.de>
  * @license  GPL v3+
  * @version  GIT: v1.3.2014-03-01
- * @link     https://github.com/devmount/Counter
+ * @link     https://github.com/devmount-mozilo/Counter
  * @link     http://devmount.de/Develop/moziloCMS/Plugins/Counter.html
  * @see      Now faith is being sure of what we hope for and certain of what we do
  *           not see.
@@ -38,7 +38,7 @@ require_once "database.php";
  * @package  PHP_MoziloPlugins
  * @author   DEVMOUNT <mail@devmount.de>
  * @license  GPL v3+
- * @link     https://github.com/devmount/Counter
+ * @link     https://github.com/devmount-mozilo/Counter
  */
 class Counter extends Plugin
 {

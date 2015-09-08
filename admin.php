@@ -12,7 +12,7 @@
  * @package  PHP_MoziloPlugins
  * @author   DEVMOUNT <mail@devmount.de>
  * @license  GPL v3+
- * @link     https://github.com/devmount/Counter
+ * @link     https://github.com/devmount-mozilo/Counter
  *
  * Plugin created by DEVMOUNT
  * www.devmount.de
@@ -31,7 +31,7 @@ if (!defined('IS_ADMIN') or !IS_ADMIN) {
  * @package  PHP_MoziloPlugins
  * @author   DEVMOUNT <mail@devmount.de>
  * @license  GPL v3+
- * @link     https://github.com/devmount/Counter
+ * @link     https://github.com/devmount-mozilo/Counter
  */
 class CounterAdmin extends Counter
 {
