@@ -16,7 +16,9 @@ Installing a plugin manually requires FTP Access.
 - Go to the backend tab *Plugins* and activate the now listed new Counter plugin
 
 ## Syntax
-```{Counter}```
+```
+{Counter}
+```
 Inserts the Counter and depending on backend configuration different or all counter elements.
 If visits shall be counted for the whole website, the plugin tag can be placed in the *template.html* of the current template (e.g. in the footer section).
 
@@ -25,4 +27,4 @@ This Plugin is distributed under *GNU General Public License, Version 3* (see LI
 
 ## Documentation
 A detailed documentation and demo can be found on DEVMOUNT's website:
-http://devmount.de/Develop/moziloCMS/Plugins/Counter.html
+http://t.devmount.de/Develop/moziloCMS/Plugins/Counter.html
