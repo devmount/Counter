@@ -26,5 +26,5 @@ If visits shall be counted for the whole website, the plugin tag can be placed i
 This Plugin is distributed under *GNU General Public License, Version 3* (see LICENSE) or, at your choice, any further version.
 
 ## Documentation
-A detailed documentation and demo can be found on DEVMOUNT's website:
-http://t.devmount.de/Develop/moziloCMS/Plugins/Counter.html
+A detailed documentation and demo can be found here:  
+https://github.com/devmount-mozilo/Counter/wiki/Dokumentation [german]
