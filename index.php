@@ -12,8 +12,7 @@
  * @author   DEVMOUNT <mail@devmount.de>
  * @license  GPL v3+
  * @version  GIT: v1.3.2014-03-01
- * @link     https://github.com/devmount-mozilo/Counter
- * @link     http://devmount.de/Develop/moziloCMS/Plugins/Counter.html
+ * @link     https://github.com/devmount-mozilo/Counter/wiki/Dokumentation
  * @see      Now faith is being sure of what we hope for and certain of what we do
  *           not see.
  *            — The Bible
@@ -52,7 +51,7 @@ class Counter extends Plugin
     const PLUGIN_VERSION = 'v1.3.2014-03-01';
     const MOZILO_VERSION = '2.0';
     const PLUGIN_DOCU
-        = 'http://devmount.de/Develop/moziloCMS/Plugins/Counter.html';
+        = 'https://github.com/devmount-mozilo/Counter/wiki/Dokumentation';
 
     private $_plugin_tags = array(
         'tag' => '{Counter}',
